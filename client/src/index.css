@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .bg-dark-100 {
+    @apply bg-[#3D3B39];
+  }
+  .bg-dark-200 {
+    @apply bg-[#2B2927];
+  }
+  .bg-dark-300 {
+    @apply bg-[#272522];
+  }
+  .bg-dark-400 {
+    @apply bg-[#22201E];
+  }
+  .bg-white-piece {
+    @apply bg-[#edeed1];
+  }
+  .bg-black-piece {
+    @apply bg-[#779952];
+  }
+  .text-white-piece {
+    @apply text-[#edeed1];
+  }
+  .text-black-piece {
+    @apply text-[#779952];
+  }
+}
+
+body {
+  height: 100vh;
+  padding: 0;
+  background-color: #312e2b;
+}

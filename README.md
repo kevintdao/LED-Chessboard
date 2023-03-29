@@ -9,7 +9,7 @@
 - TailwindCSS
 - Chess.JS
 
-In the `/client` directory:
+### In the `/client` directory:
 
 Install the dependencies
 
@@ -30,10 +30,11 @@ npm run dev
 - Node.JS
 - Javascript
 - Socket.IO
+- Stockfish
 - Chess.JS
 - Firebase
 
-In the `/server` direction:
+### In the `/server` directory:
 
 Install the dependencies
 
@@ -47,7 +48,7 @@ Run the Node.JS server
 nodemon
 ```
 
-## Raspberry PI
+## Raspberry Pi
 
 ### Technologies
 

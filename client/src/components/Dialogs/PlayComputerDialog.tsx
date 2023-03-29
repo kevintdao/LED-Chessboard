@@ -22,7 +22,7 @@ export default function PlayComputerDialog({ isOpen, setIsOpen }: Props) {
 
   function handleStartGame(piece: string) {
     const id = v4();
-    navigate(`/room/${id}`, { state: { piece } });
+    navigate(`/room/${id}?computer`, { state: { piece } });
   }
 
   return (

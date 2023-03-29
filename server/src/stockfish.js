@@ -3,6 +3,7 @@ import { engine, STOCKFISH_DEPTH } from './index.js';
 
 let bestMove;
 let CP;
+let mate;
 let finished = false;
 
 // start stockfish engine
@@ -28,12 +29,19 @@ export function onMessageListener(message) {
     console.log(message, '\n');
 
     finished = true;
-    const re = /cp [-\d]+|(?<!\w)pv [\w\d]+/g;
+    const re = /cp [-\d]+|mate [\d]+|(?<!\w)pv [\w\d]+/g;
     const stockfishMessage = message.match(re);
 
     if (stockfishMessage) {
-      const moveCP = parseInt(stockfishMessage[0].split(' ')[1], 10) / 100;
-      CP = moveCP;
+      const [type, score] = stockfishMessage[0].split(' ');
+
+      if (type === 'mate') {
+        mate = parseInt(score, 10);
+      }
+
+      if (type === 'cp') {
+        CP = parseInt(score, 10) / 100;
+      }
 
       bestMove = stockfishMessage[1].split(' ')[1];
     }
@@ -44,6 +52,7 @@ export function onMessageListener(message) {
 // get stockfish move
 export async function getStockfishMove(fen, depth) {
   finished = false;
+  mate = undefined;
   engine.postMessage(`position fen ${fen}`);
   engine.postMessage(`go depth ${depth}`);
 
@@ -55,6 +64,7 @@ export async function getStockfishMove(fen, depth) {
     resolve({
       bestMove,
       CP,
+      mate,
     });
   });
 }

@@ -1,27 +1,17 @@
 import { Chess } from 'chess.js';
+import { Server, Socket } from 'socket.io';
 import { rooms } from './index.js';
 import { getStockfishMove } from './stockfish.js';
 
 export const initializeSocket = (io) => {
   io.on('connection', (socket) => {
-    const { roomId, id, user, piece } = socket.handshake.query;
+    const { roomId, id, user, piece, type } = socket.handshake.query;
 
     // check if room exists
     const room = rooms.find((room) => room.id === roomId);
-    if (!room) {
-      // create room
-      rooms.push({
-        id: roomId,
-        users: [
-          {
-            id: user,
-            piece: piece ?? 'white',
-          },
-        ],
-        game: new Chess(),
-        type: 'computer',
-      });
-    }
+
+    // join or create room
+    joinOrCreateRoom(socket, room, roomId, user, type, piece);
 
     socket.join(roomId);
 
@@ -41,6 +31,7 @@ export const initializeSocket = (io) => {
     socket.on('getHint', async (data) => {
       const { bestMove } = await getStockfishMove(data.fen, 15);
       const [from, to] = bestMove?.match(/\w\d/g);
+
       socket.emit('updateHint', { from, to });
     });
 
@@ -71,6 +62,54 @@ export const initializeSocket = (io) => {
   });
 };
 
+/**
+ *
+ * @param {Socket} socket
+ * @param {*} room
+ * @param {string} roomId
+ * @param {string} user
+ * @param {string} type
+ * @param {string} piece
+ */
+function joinOrCreateRoom(socket, room, roomId, user, type, piece) {
+  let playerPiece = piece;
+
+  if (!room) {
+    const game = new Chess();
+    // create room
+    rooms.push({
+      id: roomId,
+      users: [
+        {
+          id: user,
+          piece: piece ?? 'white',
+        },
+      ],
+      game,
+      turn: game.turn(),
+      type: type ?? 'computer',
+    });
+  } else {
+    // get the player piece
+    const existPlayerPiece = room.users[0].piece;
+    playerPiece = existPlayerPiece === 'white' ? 'black' : 'white';
+
+    // add player to room
+    room.users.push({
+      id: user,
+      piece: playerPiece,
+    });
+  }
+
+  socket.emit('updatePiece', playerPiece);
+}
+
+/**
+ * Computer move
+ * @param {Server} io
+ * @param {*} room
+ * @param {number} roomId
+ */
 async function computerMove(io, room, roomId) {
   const { game } = room;
 
@@ -85,9 +124,15 @@ async function computerMove(io, room, roomId) {
   io.in(roomId).emit('updateBoardComputer', { from, to, CP });
 }
 
+/**
+ * Compute CP
+ * @param {Server} io
+ * @param {*} room
+ * @param {number} roomId
+ */
 async function computeCP(io, room, roomId) {
   const { game } = room;
 
-  const { CP } = await getStockfishMove(game.fen(), 15);
-  io.in(roomId).emit('updateCP', CP);
+  const { CP, mate } = await getStockfishMove(game.fen(), 15);
+  io.in(roomId).emit('updateCP', CP || mate);
 }

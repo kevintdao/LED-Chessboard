@@ -1,7 +1,7 @@
 import { Chess } from 'chess.js';
 import { useEffect, useState } from 'react';
 import { Chessboard } from 'react-chessboard';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 
 import CaptureSound from '../assets/audios/capture.mp3';
 import MoveSound from '../assets/audios/move-self.mp3';
@@ -36,6 +36,7 @@ const initialCaptures: Captures = {
 export default function Room() {
   const { state } = useLocation();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
 
   const { socket, setSocket } = useGame();
 
@@ -162,6 +163,11 @@ export default function Room() {
     setHintArrow([[data.from, data.to]]);
   };
 
+  const handleUpdatePiece = (piece: BoardOrientation) => {
+    console.log(piece);
+    setPieceColor(piece);
+  };
+
   useEffect(() => {
     // check if game is over
     if (game.isGameOver()) {
@@ -185,16 +191,14 @@ export default function Room() {
     // connect to room
     const newSocket = io('http://localhost:8000', {
       query: {
-        piece: state?.piece ?? 'w',
+        piece: state?.piece ?? 'white',
         roomId: id,
         user: v4(),
+        type:
+          searchParams.get('multiplayer') !== null ? 'multiplayer' : 'computer',
       },
     });
     setSocket(newSocket);
-
-    if (state?.piece) {
-      setPieceColor(state?.piece);
-    }
   }, [state?.piece]);
 
   // socket event listeners
@@ -203,12 +207,14 @@ export default function Room() {
     socket?.on('updateBoardComputer', handleUpdateBoard);
     socket?.on('updateCP', handleUpdateCP);
     socket?.on('updateHint', handleUpdateHint);
+    socket?.on('updatePiece', handleUpdatePiece);
 
     return () => {
       socket?.off('updateBoard', handleUpdateBoard);
       socket?.off('updateBoardComputer', handleUpdateBoard);
       socket?.off('updateCP', handleUpdateCP);
       socket?.off('updateHint', handleUpdateHint);
+      socket?.off('updatePiece', handleUpdatePiece);
     };
   }, [socket, handleUpdateBoard, handleUpdateCP, handleUpdateHint]);
 

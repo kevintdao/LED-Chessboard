@@ -16,10 +16,12 @@
     "@types/lodash": "^4.14.191",
     "@types/uuid": "^9.0.1",
     "chess.js": "^1.0.0-beta.3",
+    "firebase": "^9.19.1",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-chessboard": "^2.0.8",
     "react-dom": "^18.2.0",
+    "react-firebase-hooks": "^5.1.1",
     "react-router-dom": "^6.8.1",
     "socket.io-client": "^4.6.1",
     "uuid": "^9.0.0"

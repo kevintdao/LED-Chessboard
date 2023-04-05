@@ -2,13 +2,14 @@ import {
   ArrowLeftOnRectangleIcon as LogoutIcon,
   ArrowRightOnRectangleIcon as LoginIcon,
 } from '@heroicons/react/24/solid';
+import {
+  GoogleAuthProvider,
+  getAuth,
+  signInWithPopup,
+  signOut,
+} from 'firebase/auth';
 import { Link, Outlet } from 'react-router-dom';
-
-// placeholder
-const user = {
-  name: 'John Doe',
-  email: 'johndoe@test.com',
-};
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 const getInitials = (name: string) => {
   const names = name.split(' ');
@@ -21,10 +22,24 @@ const getInitials = (name: string) => {
 };
 
 export default function Root() {
+  const auth = getAuth();
+  const [user] = useAuthState(auth);
+
+  const handleLogin = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider);
+  };
+
+  const handleLogout = () => {
+    signOut(auth);
+  };
+
+  console.log(user);
+
   return (
     <div className="flex flex-col h-screen space-y-2">
       <header>
-        <nav className="relative w-full flex flex-wrap items-center justify-between py-3 bg-dark-400 text-white hover:text-gray-700 focus:text-gray-700 shadow-lg">
+        <nav className="relative w-full flex flex-wrap items-center justify-between py-3 bg-dark-400 text-white hover:text-gray-700 focus:text-gray-700 shadow-lg h-16">
           <div className="container-fluid w-full flex flex-wrap items-center justify-between px-4">
             <div className="container-fluid">
               <Link
@@ -42,28 +57,29 @@ export default function Root() {
                 <div className="flex gap-2 items-center">
                   <div className="relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-600">
                     <span className="font-normal text-gray-600 dark:text-gray-300">
-                      {getInitials(user.name)}
+                      {/* <img src={user.photoURL} alt="profile-picture" /> */}
+                      {getInitials(user.displayName as string)}
                     </span>
                   </div>
                   <span className="text-base font-medium text-gray-600 dark:text-gray-300">
-                    {user.name}
+                    {user.displayName}
                   </span>
-                  <Link
+                  <button
                     className="bg-dark-200 p-1 border rounded-md text-white hover:bg-dark-300 hover:text-[#edeed1] hover:border-[#edeed1] inline-flex items-center gap-1"
-                    to="/"
+                    onClick={handleLogout}
                   >
                     <LogoutIcon className="w-4 h-4" />
-                    <span>Log Out</span>
-                  </Link>
+                    Log Out
+                  </button>
                 </div>
               ) : (
-                <Link
+                <button
                   className="bg-dark-200 p-1 border rounded-md text-white hover:bg-dark-300 hover:text-[#edeed1] hover:border-[#edeed1] inline-flex items-center gap-1"
-                  to="/"
+                  onClick={handleLogin}
                 >
                   <LoginIcon className="w-4 h-4" />
-                  <span>Log In</span>
-                </Link>
+                  Log In
+                </button>
               )}
             </div>
           </div>

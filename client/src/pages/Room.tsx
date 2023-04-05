@@ -38,6 +38,7 @@ export default function Room() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
 
+  const depth = searchParams.get('depth');
   const { socket, setSocket } = useGame();
 
   // game states
@@ -196,6 +197,7 @@ export default function Room() {
         user: v4(),
         type:
           searchParams.get('multiplayer') !== null ? 'multiplayer' : 'computer',
+        depth,
       },
     });
     setSocket(newSocket);
@@ -233,7 +235,7 @@ export default function Room() {
           {/* top user screen user */}
           <User
             color={oppPieceColor}
-            name={oppName}
+            name={depth ? `${oppName} (Level: ${depth})` : oppName}
             captures={captures[oppPieceColor]}
             oppCaptures={captures[pieceColor]}
           />

@@ -9,20 +9,23 @@ interface Props {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const DEPTHS = [1, 2, 3, 4, 6, 8, 13, 20];
+const NUM_DEPTHS = 20;
+const DEPTHS = Array.from({ length: NUM_DEPTHS }, (_, i) => i + 1);
 
 export default function PlayComputerDialog({ isOpen, setIsOpen }: Props) {
   const navigate = useNavigate();
 
-  const [stockfishLevel, setStockfishLevel] = useState(1);
+  const [stockfishDepth, setStockfishDepth] = useState(6);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setStockfishLevel(parseInt(e.target.value, 10));
+    setStockfishDepth(parseInt(e.target.value, 10));
   }
 
   function handleStartGame(piece: string) {
     const id = v4();
-    navigate(`/room/${id}?computer`, { state: { piece } });
+    navigate(`/room/${id}?computer&depth=${stockfishDepth}`, {
+      state: { piece },
+    });
   }
 
   return (
@@ -60,14 +63,13 @@ export default function PlayComputerDialog({ isOpen, setIsOpen }: Props) {
                 id="default-range"
                 type="range"
                 min={1}
-                max={8}
-                value={stockfishLevel}
+                max={NUM_DEPTHS}
+                value={stockfishDepth}
                 onChange={handleChange}
                 className="w-full h-2 rounded-lg cursor-pointer accent-[#779952] bg-[#edeed1]"
               />
               <span>
-                Stockfish Settings: Level = {stockfishLevel} | Depth ={' '}
-                {DEPTHS[stockfishLevel - 1]}
+                Stockfish Settings: Depth = {DEPTHS[stockfishDepth - 1]}
               </span>
             </div>
 

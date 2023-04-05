@@ -4,6 +4,7 @@ import { push, ref, update } from 'firebase/database';
 import { rooms } from './index.js';
 import { getStockfishMove } from './stockfish.js';
 import { database } from './index.js';
+import { initializeDB } from './firebase.js';
 
 export const initializeSocket = (io) => {
   io.on('connection', (socket) => {
@@ -82,6 +83,7 @@ function joinOrCreateRoom(socket, room, roomId, user, type, piece) {
 
   if (!room) {
     const game = new Chess();
+
     // create room
     rooms.push({
       id: roomId,
@@ -95,6 +97,9 @@ function joinOrCreateRoom(socket, room, roomId, user, type, piece) {
       turn: game.turn(),
       type: type ?? 'computer',
     });
+
+    // intialize firebase when new room is created
+    initializeDB();
   } else {
     // get the player piece
     const existPlayerPiece = room.users[0].piece;

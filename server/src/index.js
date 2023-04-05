@@ -12,6 +12,7 @@ import { startStockfish } from './stockfish.js';
 
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
+import { initializeDB } from './firebase.js';
 
 // Your web app's Firebase configuration
 export const firebaseConfig = {
@@ -26,6 +27,9 @@ export const firebaseConfig = {
 // Initialize Firebase
 const firebase = initializeApp(firebaseConfig);
 export const database = getDatabase();
+
+// initialize database
+initializeDB();
 
 export const game = new Chess();
 export let rooms = [];

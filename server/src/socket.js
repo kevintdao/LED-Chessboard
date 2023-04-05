@@ -1,7 +1,9 @@
 import { Chess } from 'chess.js';
 import { Server, Socket } from 'socket.io';
+import { push, ref, update } from 'firebase/database';
 import { rooms } from './index.js';
 import { getStockfishMove } from './stockfish.js';
+import { database } from './index.js';
 
 export const initializeSocket = (io) => {
   io.on('connection', (socket) => {
@@ -43,6 +45,10 @@ export const initializeSocket = (io) => {
 
       // move piece
       game.move(data);
+
+      // update firebase
+      push(ref(database, `moves`), { from: data.from, to: data.to });
+      push(ref(database, 'fen'), { fen: game.fen() });
 
       computeCP(io, room, roomId);
 
@@ -101,6 +107,11 @@ function joinOrCreateRoom(socket, room, roomId, user, type, piece) {
     });
   }
 
+  // add user to firebase
+  update(ref(database, `users/${playerPiece}`), {
+    user,
+  });
+
   socket.emit('updatePiece', playerPiece);
 }
 
@@ -119,6 +130,10 @@ async function computerMove(io, room, roomId) {
 
   // move piece
   game.move({ from, to });
+
+  // update firebase
+  push(ref(database, `moves`), { from, to });
+  push(ref(database, 'fen'), { fen: game.fen() });
 
   // update board
   io.in(roomId).emit('updateBoardComputer', { from, to, CP });

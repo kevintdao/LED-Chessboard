@@ -9,7 +9,7 @@ export function initializeDB() {
     },
     moves: {},
     fen: {},
-    turn: 'white',
+    turn: 'w',
     type: 'computer',
   });
 }

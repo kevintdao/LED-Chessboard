@@ -16,7 +16,7 @@ export function startStockfish() {
 
 // check if stockfish has finished analysis
 export function finishAnalysis(message) {
-  console.log(message);
+  // console.log(message);
   return (
     message.startsWith(`info depth ${STOCKFISH_DEPTH}`) &&
     (message.includes(' cp ') || message.includes(' mate '))

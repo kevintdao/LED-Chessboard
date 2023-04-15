@@ -50,6 +50,7 @@ export const initializeSocket = (io) => {
       // update firebase
       push(ref(database, `moves`), { from: data.from, to: data.to });
       push(ref(database, 'fen'), { fen: game.fen() });
+      update(ref(database, '/'), { turn: game.turn() });
 
       computeCP(io, room, roomId);
 
@@ -139,6 +140,7 @@ async function computerMove(io, room, roomId) {
   // update firebase
   push(ref(database, `moves`), { from, to });
   push(ref(database, 'fen'), { fen: game.fen() });
+  update(ref(database, '/'), { turn: game.turn() });
 
   // update board
   io.in(roomId).emit('updateBoardComputer', { from, to, CP });

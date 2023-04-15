@@ -54,3 +54,11 @@ nodemon
 
 - Python
 - python-chess
+- pyrebase
+- serial
+
+## Arduino
+
+### Technologies
+
+- Adafruit_NeoPixel

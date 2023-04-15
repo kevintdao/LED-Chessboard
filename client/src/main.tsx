@@ -11,12 +11,13 @@ import { initializeApp } from 'firebase/app';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_API_KEY,
-  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_APP_ID,
+  apiKey: 'AIzaSyCupgmt57tzvco2d-yMpPIrmTzee20fC6o',
+  authDomain: 'iot-project-led-chessboard.firebaseapp.com',
+  databaseURL: 'https://iot-project-led-chessboard-default-rtdb.firebaseio.com',
+  projectId: 'iot-project-led-chessboard',
+  storageBucket: 'iot-project-led-chessboard.appspot.com',
+  messagingSenderId: '605922107744',
+  appId: '1:605922107744:web:fbae38a1c93fc233c0fe05',
 };
 
 // initialize firebase

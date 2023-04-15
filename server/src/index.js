@@ -16,12 +16,13 @@ import { initializeDB } from './firebase.js';
 
 // Your web app's Firebase configuration
 export const firebaseConfig = {
-  apiKey: process.env.API_KEY,
-  authDomain: process.env.AUTH_DOMAIN,
-  projectId: process.env.PROJECT_ID,
-  storageBucket: process.env.STORAGE_BUCKET,
-  messagingSenderId: process.env.MESSAGING_SENDER_ID,
-  appId: process.env.APP_ID,
+  apiKey: 'AIzaSyCupgmt57tzvco2d-yMpPIrmTzee20fC6o',
+  authDomain: 'iot-project-led-chessboard.firebaseapp.com',
+  databaseURL: 'https://iot-project-led-chessboard-default-rtdb.firebaseio.com',
+  projectId: 'iot-project-led-chessboard',
+  storageBucket: 'iot-project-led-chessboard.appspot.com',
+  messagingSenderId: '605922107744',
+  appId: '1:605922107744:web:fbae38a1c93fc233c0fe05',
 };
 
 // Initialize Firebase

@@ -1,7 +1,7 @@
 import { database } from './index.js';
 import { ref, set } from 'firebase/database';
 
-export function initializeDB() {
+export function initializeDB(type) {
   set(ref(database, '/'), {
     users: {
       white: null,
@@ -10,6 +10,6 @@ export function initializeDB() {
     moves: {},
     fen: {},
     turn: 'w',
-    type: 'computer',
+    type: type ?? 'computer',
   });
 }

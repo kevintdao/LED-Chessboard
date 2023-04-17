@@ -100,7 +100,7 @@ function joinOrCreateRoom(socket, room, roomId, user, type, piece) {
     });
 
     // intialize firebase when new room is created
-    initializeDB();
+    initializeDB(type);
   } else {
     // get the player piece
     const existPlayerPiece = room.users[0].piece;

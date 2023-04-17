@@ -23,7 +23,7 @@ const getInitials = (name: string) => {
 
 export default function Root() {
   const auth = getAuth();
-  const [user] = useAuthState(auth);
+  const [user, loading] = useAuthState(auth);
 
   const handleLogin = () => {
     const provider = new GoogleAuthProvider();
@@ -34,7 +34,7 @@ export default function Root() {
     signOut(auth);
   };
 
-  console.log(user);
+  if (loading) return;
 
   return (
     <div className="flex flex-col h-screen space-y-2">

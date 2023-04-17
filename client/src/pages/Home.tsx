@@ -8,16 +8,19 @@ import PlayComputerDialog from '../components/Dialogs/PlayComputerDialog';
 import PlayOnlineDialog from '../components/Dialogs/PlayOnlineDialog';
 import { getAuth } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import Loading from '../components/Loading';
 
 export default function Home() {
   const auth = getAuth();
-  const [user] = useAuthState(auth);
+  const [user, loading] = useAuthState(auth);
 
   const navigate = useNavigate();
 
   // dialog states
   const [playComputerOpen, setPlayComputerOpen] = useState<boolean>(false);
   const [playOnlineOpen, setPlayOnlineOpen] = useState<boolean>(false);
+
+  if (loading) return <Loading />;
 
   return (
     <div className="container mx-auto">

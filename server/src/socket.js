@@ -1,6 +1,6 @@
 import { Chess } from 'chess.js';
 import { Server, Socket } from 'socket.io';
-import { push, ref, update } from 'firebase/database';
+import { onChildAdded, push, ref, update } from 'firebase/database';
 import { rooms } from './index.js';
 import { getStockfishMove } from './stockfish.js';
 import { database } from './index.js';
@@ -14,7 +14,7 @@ export const initializeSocket = (io) => {
     const room = rooms.find((room) => room.id === roomId);
 
     // join or create room
-    joinOrCreateRoom(socket, room, roomId, user, type, piece);
+    joinOrCreateRoom(io, socket, room, roomId, user, type, piece);
 
     socket.join(roomId);
 
@@ -45,7 +45,7 @@ export const initializeSocket = (io) => {
       const { game } = room;
 
       // move piece
-      game.move(data);
+      // game.move(data);
 
       // update firebase
       push(ref(database, `moves`), { from: data.from, to: data.to });
@@ -79,7 +79,7 @@ export const initializeSocket = (io) => {
  * @param {string} type
  * @param {string} piece
  */
-function joinOrCreateRoom(socket, room, roomId, user, type, piece) {
+function joinOrCreateRoom(io, socket, room, roomId, user, type, piece) {
   let playerPiece = piece;
 
   if (!room) {
@@ -101,6 +101,24 @@ function joinOrCreateRoom(socket, room, roomId, user, type, piece) {
 
     // intialize firebase when new room is created
     initializeDB(type);
+
+    // firebase "moves" listener
+    const moveRef = ref(database, 'moves');
+    onChildAdded(moveRef, (snapshot) => {
+      const room = rooms.find((room) => room.id === roomId);
+      const { game } = room;
+      const move = snapshot.val();
+
+      // move piece from firebase
+      game.move(snapshot.val());
+
+      computeCP(io, room, roomId);
+
+      // update board
+      if (room.type === 'multiplayer') {
+        socket.broadcast.emit('updateBoard', move);
+      }
+    });
   } else {
     // get the player piece
     const existPlayerPiece = room.users[0].piece;
@@ -135,7 +153,7 @@ async function computerMove(io, room, roomId) {
   const [from, to] = bestMove?.match(/\w\d/g);
 
   // move piece
-  game.move({ from, to });
+  // game.move({ from, to });
 
   // update firebase
   push(ref(database, `moves`), { from, to });

@@ -30,7 +30,7 @@ def turn_listener(message):
   print('Turn:', data)
 
 
-def getAllLegalMoves(board):
+def get_all_legal_moves(board: chess.Board) -> dict:
   moves = {}
 
   # convert all legal moves into a list
@@ -57,6 +57,6 @@ if __name__ == '__main__':
   #     line = ser.readline().decode('utf-8').rstrip()
   #     print(line)
   print(board)
-  moves = getAllLegalMoves(board)
+  moves = get_all_legal_moves(board)
   # move_stream = db.child("moves").stream(move_listener)
   # turn_stream = db.child('turn').stream(turn_listener)

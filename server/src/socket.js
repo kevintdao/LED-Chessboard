@@ -110,7 +110,11 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece) {
       const move = snapshot.val();
 
       // move piece from firebase
-      game.move(snapshot.val());
+      try {
+        game.move(snapshot.val());
+      } catch (err) {
+        console.log(err);
+      }
 
       computeCP(io, room, roomId);
 

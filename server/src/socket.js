@@ -1,26 +1,26 @@
 import { Chess } from 'chess.js';
 import { Server, Socket } from 'socket.io';
 import { onChildAdded, push, ref, update } from 'firebase/database';
-import { rooms } from './index.js';
-import { getStockfishMove } from './stockfish.js';
+import { STOCKFISH_DEPTH, rooms } from './index.js';
+import { getBestMove, getStockfishMove } from './stockfish.js';
 import { database } from './index.js';
 import { initializeDB } from './firebase.js';
 
 export const initializeSocket = (io) => {
   io.on('connection', (socket) => {
-    const { roomId, id, user, piece, type } = socket.handshake.query;
+    const { roomId, id, user, piece, type, depth } = socket.handshake.query;
 
     // check if room exists
     const room = rooms.find((room) => room.id === roomId);
 
     // join or create room
-    joinOrCreateRoom(io, socket, room, roomId, user, type, piece);
+    joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth);
 
     socket.join(roomId);
 
     // check if type is computer and player is black
     if (room && room.type === 'computer' && piece === 'black') {
-      computerMove(io, room, roomId);
+      computerMove(io, room, roomId, depth);
     }
 
     console.log('a user connected');
@@ -32,7 +32,7 @@ export const initializeSocket = (io) => {
 
     // get hint socket event
     socket.on('getHint', async (data) => {
-      const { bestMove } = await getStockfishMove(data.fen, 15);
+      const { bestMove } = await getBestMove(data.fen, STOCKFISH_DEPTH);
       const [from, to] = bestMove?.match(/\w\d/g);
 
       socket.emit('updateHint', { from, to });
@@ -58,7 +58,7 @@ export const initializeSocket = (io) => {
       if (room.type === 'computer') {
         // wait 1 second before computer move
         setTimeout(() => {
-          computerMove(io, room, roomId);
+          computerMove(io, room, roomId, room.depth);
         }, 1000);
       }
 
@@ -79,7 +79,7 @@ export const initializeSocket = (io) => {
  * @param {string} type
  * @param {string} piece
  */
-function joinOrCreateRoom(io, socket, room, roomId, user, type, piece) {
+function joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth) {
   let playerPiece = piece;
 
   if (!room) {
@@ -97,6 +97,7 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece) {
       game,
       turn: game.turn(),
       type: type ?? 'computer',
+      depth: type === 'computer' ? depth : 15,
     });
 
     // intialize firebase when new room is created
@@ -149,11 +150,12 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece) {
  * @param {*} room
  * @param {number} roomId
  */
-async function computerMove(io, room, roomId) {
+async function computerMove(io, room, roomId, depth) {
   const { game } = room;
 
   // get best move
-  const { bestMove, CP } = await getStockfishMove(game.fen(), 15);
+  const { CP } = await getStockfishMove(game.fen(), STOCKFISH_DEPTH);
+  const { bestMove } = await getBestMove(game.fen(), depth);
   const [from, to] = bestMove?.match(/\w\d/g);
 
   // move piece

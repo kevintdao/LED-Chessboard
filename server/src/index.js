@@ -8,7 +8,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 import { initializeSocket } from './socket.js';
-import { startStockfish } from './stockfish.js';
+import { startStockfish, startStockfishComputer } from './stockfish.js';
 
 import { initializeApp } from 'firebase/app';
 import { getDatabase, onChildAdded, onValue, ref } from 'firebase/database';
@@ -37,6 +37,7 @@ export let rooms = [];
 
 export const STOCKFISH_DEPTH = 15;
 export const engine = startStockfish();
+export const computerEngine = startStockfishComputer();
 
 const PORT = process.env.PORT || 8000;
 const app = express();

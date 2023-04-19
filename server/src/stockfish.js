@@ -1,15 +1,24 @@
 import stockfish from 'stockfish';
-import { engine, STOCKFISH_DEPTH } from './index.js';
+import { computerEngine, engine, STOCKFISH_DEPTH } from './index.js';
 
 let bestMove;
 let CP;
 let mate;
 let finished = false;
+let finishedBestMove = false;
 
 // start stockfish engine
 export function startStockfish() {
   const engine = stockfish();
   engine.onmessage = (message) => onMessageListener(message);
+
+  return engine;
+}
+
+// start stockfish engine for playing against computer
+export function startStockfishComputer() {
+  const engine = stockfish();
+  engine.onmessage = (message) => onMessageListenerBestMove(message);
 
   return engine;
 }
@@ -26,7 +35,7 @@ export function finishAnalysis(message) {
 // get best move from stockfish message
 export function onMessageListener(message) {
   if (finishAnalysis(message)) {
-    console.log(message, '\n');
+    // console.log(message, '\n');
 
     finished = true;
     const re = /cp [-\d]+|mate [\d]+|(?<!\w)pv [\w\d]+/g;
@@ -42,11 +51,38 @@ export function onMessageListener(message) {
       if (type === 'cp') {
         CP = parseInt(score, 10) / 100;
       }
-
-      bestMove = stockfishMessage[1].split(' ')[1];
     }
   }
   return;
+}
+
+export function finishAnalysisBestMove(message) {
+  return message.startsWith('bestmove');
+}
+
+export function onMessageListenerBestMove(message) {
+  if (finishAnalysisBestMove(message)) {
+    finishedBestMove = true;
+
+    bestMove = message.split(' ')[1];
+  }
+  return;
+}
+
+export async function getBestMove(fen, depth) {
+  finishedBestMove = false;
+  computerEngine.postMessage(`position fen ${fen}`);
+  computerEngine.postMessage(`go depth ${depth}`);
+
+  while (!finishedBestMove) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+
+  return new Promise((resolve) => {
+    resolve({
+      bestMove,
+    });
+  });
 }
 
 // get stockfish move

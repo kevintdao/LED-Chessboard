@@ -18,9 +18,11 @@ export const initializeSocket = (io) => {
 
     socket.join(roomId);
 
+    const newRoom = rooms.find((room) => room.id === roomId);
+
     // check if type is computer and player is black
-    if (room && room.type === 'computer' && piece === 'black') {
-      computerMove(io, room, roomId, depth);
+    if (newRoom && newRoom.type === 'computer' && piece === 'black') {
+      computerMove(io, newRoom, roomId, depth);
     }
 
     console.log('a user connected');

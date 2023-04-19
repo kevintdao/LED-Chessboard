@@ -235,7 +235,7 @@ export default function Room() {
           {/* top user screen user */}
           <User
             color={oppPieceColor}
-            name={depth ? `${oppName} (Level: ${depth})` : oppName}
+            name={depth ? `${oppName} (Depth: ${depth})` : oppName}
             captures={captures[oppPieceColor]}
             oppCaptures={captures[pieceColor]}
           />

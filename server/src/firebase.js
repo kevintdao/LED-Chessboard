@@ -11,5 +11,6 @@ export function initializeDB(type) {
     fen: {},
     turn: 'w',
     type: type ?? 'computer',
+    boardPiece: 'w',
   });
 }

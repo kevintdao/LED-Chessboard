@@ -105,6 +105,11 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth) {
     // intialize firebase when new room is created
     initializeDB(type);
 
+    if (type === 'computer') {
+      // update board in firebase
+      update(ref(database, '/'), { boardPiece: piece });
+    }
+
     // firebase "moves" listener
     const moveRef = ref(database, 'moves');
     onChildAdded(moveRef, (snapshot) => {

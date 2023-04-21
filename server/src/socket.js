@@ -108,7 +108,7 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth) {
 
     if (type === 'computer') {
       // update board in firebase
-      update(ref(database, '/'), { boardPiece: piece });
+      update(ref(database, '/'), { boardPiece: piece === 'white' ? 'w' : 'b' });
     }
 
     // firebase "moves" listener

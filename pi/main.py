@@ -37,6 +37,10 @@ def add_move(fromSquare: str, toSquare: str):
       'to': toSquare
   })
 
+  # update turn
+  turn = 'w' if board.turn == chess.WHITE else 'b'
+  db.child('turn').set(turn)
+
   # make move on board
   move = chess.Move.from_uci(fromSquare + toSquare)
   board.push(move)

@@ -2,7 +2,7 @@
 # import serial
 import chess
 import re
-# from firebase import db
+from firebase import db
 
 board = chess.Board()
 
@@ -28,6 +28,18 @@ def move_listener(message):
 def turn_listener(message):
   data = message['data']
   print('Turn:', data)
+
+
+def add_move(fromSquare: str, toSquare: str):
+  # add move to firebase
+  db.child('moves').push({
+      'from': fromSquare,
+      'to': toSquare
+  })
+
+  # make move on board
+  move = chess.Move.from_uci(fromSquare + toSquare)
+  board.push(move)
 
 
 def get_all_legal_moves(board: chess.Board) -> dict:
@@ -58,5 +70,6 @@ if __name__ == '__main__':
   #     print(line)
   print(board)
   moves = get_all_legal_moves(board)
+  print(moves)
   # move_stream = db.child("moves").stream(move_listener)
   # turn_stream = db.child('turn').stream(turn_listener)

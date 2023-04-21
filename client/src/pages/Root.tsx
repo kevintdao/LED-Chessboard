@@ -34,7 +34,7 @@ export default function Root() {
     signOut(auth);
   };
 
-  if (loading) return;
+  if (loading) return <></>;
 
   return (
     <div className="flex flex-col h-screen space-y-2">

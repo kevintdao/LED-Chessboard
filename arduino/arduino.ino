@@ -1,7 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
 /* How many shift register chips are daisy-chained.*/
-#define NUMBER_OF_SHIFT_CHIPS   2
+#define NUMBER_OF_SHIFT_CHIPS   4
 
 /* Width of data (how many ext lines).*/
 #define DATA_WIDTH   NUMBER_OF_SHIFT_CHIPS * 8
@@ -16,11 +16,17 @@
 // On a Trinket or Gemma we suggest changing this to 1:
 #define LED_PIN      8
 
-// shift registers pins
+// 1st 4 shift registers pins
 #define LOAD_PIN     7  // parallel load pin of 165
 #define CLOCK_PIN    6  // clock enable pin of 165
 #define DATA_PIN     5  // Q7 pin of 165
 #define CLOCK_EN_PIN 4  // clock pin of 165
+
+// 2nd 4 shift registers pins
+#define LOAD_PIN_B     12 // parallel load pin of 165
+#define CLOCK_PIN_B    11 // clock enable pin of 165
+#define DATA_PIN_B     10 // Q7 pin of 165
+#define CLOCK_EN_PIN_B  9 // clock pin of 165
 
 // How many NeoPixels are attached to the Arduino?
 #define LED_COUNT  64
@@ -28,34 +34,39 @@
 /* You will need to change the "int" to "long" If the
  * NUMBER_OF_SHIFT_CHIPS is higher than 2.
 */
-#define BYTES_VAL_T unsigned int
+// int       = 16 bits
+// long      = 32 bits
+// long long = 64 bits
+#define BYTES_VAL_T unsigned long long
+
+// chessboard mapping
+String CHESS_MAPPING[64] = {
+    "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+    "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+    "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+    "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+    "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+    "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+    "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
+};
+
+// led mapping
+int LED_MAPPING[64] = {
+    56, 57, 58, 59, 60, 61, 62, 63,
+    55, 54, 53, 52, 51, 50, 49, 48,
+    40, 41, 42, 43, 44, 45, 46, 47,
+    39, 38, 37, 36, 35, 34, 33, 32,
+    24, 25, 26, 27, 28, 29, 30, 31,
+    23, 22, 21, 20, 19, 18, 17, 16,
+     8,  9, 10, 11, 12, 13, 14, 15,
+     7,  6,  5,  4,  3,  2,  1,  0
+};
 
 BYTES_VAL_T pinValues;
 BYTES_VAL_T oldPinValues;
 
-// chessboard mapping
-#define string[] CHESS_MAPPING = [
-    ["a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"],
-    ["a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7"],
-    ["a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6"],
-    ["a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5"],
-    ["a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4"],
-    ["a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3"],
-    ["a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"],
-    ["a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"]
-];
-
-// led mapping
-#define int[] LED_MAPPING = [
-    [56, 57, 58, 59, 60, 61, 62, 63],
-    [55, 54, 53, 52, 51, 50, 49, 48],
-    [40, 41, 42, 43, 44, 45, 46, 47],
-    [39, 38, 37, 36, 35, 34, 33, 32],
-    [24, 25, 26, 27, 28, 29, 30, 31],
-    [23, 22, 21, 20, 19, 18, 17, 16],
-    [ 8,  9, 10, 11, 12, 13, 14, 15],
-    [ 7,  6,  5,  4,  3,  2,  1,  0]
-];
+int pickedUp[] = {};
 
 // Declare our NeoPixel strip object:
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -67,14 +78,20 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 BYTES_VAL_T read_shift_regs()
 {
     long bitVal;
+    long bitValB;
     BYTES_VAL_T bytesVal = 0;
+    BYTES_VAL_T bytesValB = 0;
 
     /* Trigger a parallel Load to latch the state of the data lines */
     digitalWrite(CLOCK_EN_PIN, HIGH);
+    digitalWrite(CLOCK_EN_PIN_B, HIGH);
     digitalWrite(LOAD_PIN, LOW);
+    digitalWrite(LOAD_PIN_B, LOW);
     delayMicroseconds(PULSE_WIDTH_USEC);
     digitalWrite(LOAD_PIN, HIGH);
+    digitalWrite(LOAD_PIN_B, HIGH);
     digitalWrite(CLOCK_EN_PIN, LOW);
+    digitalWrite(CLOCK_EN_PIN_B, LOW);
 
     /* Loop to read each bit value from the serial out line
      * of the SN74HC165N.
@@ -82,15 +99,21 @@ BYTES_VAL_T read_shift_regs()
     for(int i = 0; i < DATA_WIDTH; i++)
     {
         bitVal = digitalRead(DATA_PIN);
+        bitValB = digitalRead(DATA_PIN_B);
 
         /* Set the corresponding bit in bytesVal.*/
         bytesVal |= (bitVal << ((DATA_WIDTH-1) - i));
+        bytesValB |= (bitValB << ((DATA_WIDTH+32-1) - i));
 
         /* Pulse the Clock (rising edge shifts the next bit) */
         digitalWrite(CLOCK_PIN, HIGH);
+        digitalWrite(CLOCK_PIN_B, HIGH);
         delayMicroseconds(PULSE_WIDTH_USEC);
         digitalWrite(CLOCK_PIN, LOW);
+        digitalWrite(CLOCK_PIN_B, LOW);
     }
+
+    bytesVal |= bytesValB;
 
     return(bytesVal);
 }
@@ -100,7 +123,7 @@ void display_pin_values()
 {
     Serial.print("Pin States:\r\n");
 
-    for(int i = 0; i < DATA_WIDTH; i++)
+    for(int i = 0; i < DATA_WIDTH * 2; i++)
     {
         Serial.print("  Pin-");
         Serial.print(i);
@@ -122,6 +145,30 @@ void display_pin_values()
     Serial.print("\r\n");
     strip.show();
 }
+
+// void getChange(BYTES_VAL_T pinvalues, BYTES_VAL_T oldPinValues) {
+//     for(int i = 0; i < DATA_WIDTH; i++) {
+//         long currPinValue = pinValues >> i;
+//         long oldPinValue  = oldPinValues >> i;
+
+//         // check if the oldPinValue doesn't match the currPinValue (a piece is picked up/put down)
+//         if (oldPinValue != currPinValue) {
+//           // add the pin to the array
+//           if (currPinValue == 1) {
+//             pickedUp.push(i);
+//           } else {
+//             // remove the pin from the array
+//             pickedUp.remove(i);
+//           }
+//         }
+//     }
+// }
+
+// void displayLegalMoves(int[] moves) {
+//     for(int i = 0; i < sizeof(moves); i++) {
+//         strip.setPixelColor(moves[i], strip.Color(0, 255, 0));
+//     }
+// }
 
 void setup()
 {
@@ -148,17 +195,16 @@ void setup()
 
 void loop()
 {
-    /* Read the state of all zones.
-    */
-    pinValues = read_shift_regs();
+  /* Read the state of all zones.*/
+  pinValues = read_shift_regs();
 
-    /* If there was a chage in state, display which ones changed */
-    if(pinValues != oldPinValues)
-    {
-        Serial.print("*Pin value change detected*\r\n");
-        display_pin_values();
-        oldPinValues = pinValues;
-    }
+  /* If there was a chage in state, display which ones changed */
+  if(pinValues != oldPinValues)
+  {
+    Serial.print("*Pin value change detected*\r\n");
+    display_pin_values();
+    oldPinValues = pinValues;
+  }
 
-    delay(POLL_DELAY_MSEC);
+  delay(POLL_DELAY_MSEC);
 }

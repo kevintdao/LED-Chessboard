@@ -12,5 +12,10 @@ export function initializeDB(type) {
     turn: 'w',
     type: type ?? 'computer',
     boardPiece: 'w',
+    hint: {
+      from: '',
+      to: '',
+    },
+    showHint: false,
   });
 }

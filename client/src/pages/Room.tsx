@@ -44,15 +44,15 @@ export default function Room() {
   // game states
   const [game, setGame] = useState(new Chess());
   const [kingPosition, setKingPosition] = useState<KingPosition>({
-    white: 'e1',
-    black: 'e8',
+    w: 'e1',
+    b: 'e8',
   });
   const [pieceColor, setPieceColor] = useState<BoardOrientation>('white');
   const [turn, setTurn] = useState(game.turn());
   const [gameOver, setGameOver] = useState<GameOver | undefined>();
   const [captures, setCaptures] = useState({
-    white: initialCaptures,
-    black: initialCaptures,
+    w: initialCaptures,
+    b: initialCaptures,
   });
   const [CP, setCP] = useState(0);
 
@@ -88,8 +88,8 @@ export default function Room() {
     // check if the king move
     if (result.piece === 'k') {
       result.color === 'w'
-        ? setKingPosition({ ...kingPosition, white: result.to })
-        : setKingPosition({ ...kingPosition, black: result.to });
+        ? setKingPosition({ ...kingPosition, w: result.to })
+        : setKingPosition({ ...kingPosition, w: result.to });
     }
 
     // add captured piece
@@ -97,16 +97,16 @@ export default function Room() {
       result.color === 'w'
         ? setCaptures({
             ...captures,
-            white: {
-              ...captures['white'],
-              [result.captured]: captures['white'][result.captured] + 1,
+            w: {
+              ...captures['w'],
+              [result.captured]: captures['w'][result.captured] + 1,
             },
           })
         : setCaptures({
             ...captures,
-            black: {
-              ...captures['black'],
-              [result.captured]: captures['black'][result.captured] + 1,
+            b: {
+              ...captures['b'],
+              [result.captured]: captures['b'][result.captured] + 1,
             },
           });
     }
@@ -178,7 +178,7 @@ export default function Room() {
 
     // check if king of the current player is in check
     if (game.isCheck()) {
-      const kingSquare = turn === 'w' ? kingPosition.white : kingPosition.black;
+      const kingSquare = turn === 'w' ? kingPosition.w : kingPosition.b;
       setCheckedSquare({ [kingSquare]: { background: CHECK_COLOR } });
 
       // play notify audio
@@ -236,8 +236,8 @@ export default function Room() {
           <User
             color={oppPieceColor}
             name={depth ? `${oppName} (Depth: ${depth})` : oppName}
-            captures={captures[oppPieceColor]}
-            oppCaptures={captures[pieceColor]}
+            captures={captures[oppPieceColor === 'white' ? 'w' : 'b']}
+            oppCaptures={captures[pieceColor === 'white' ? 'w' : 'b']}
           />
 
           <Chessboard
@@ -265,8 +265,8 @@ export default function Room() {
           <User
             color={pieceColor}
             name={name}
-            captures={captures[pieceColor]}
-            oppCaptures={captures[oppPieceColor]}
+            captures={captures[pieceColor === 'white' ? 'w' : 'b']}
+            oppCaptures={captures[oppPieceColor === 'white' ? 'w' : 'b']}
           />
         </div>
 

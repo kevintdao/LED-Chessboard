@@ -6,16 +6,16 @@ export function classNames(...classes: string[]) {
 }
 
 export function CPClassName(bot: string, CP: number) {
-  if (bot === 'white' && CP < 0) return 'bottom-0 text-black';
-  if (bot === 'white' && CP > 0) return 'top-0 text-white';
-  if (bot === 'black' && CP > 0) return 'bottom-0 text-white';
-  if (bot === 'black' && CP < 0) return 'top-0 text-black';
+  if (bot === 'w' && CP < 0) return 'bottom-0 text-black';
+  if (bot === 'w' && CP > 0) return 'top-0 text-white';
+  if (bot === 'b' && CP > 0) return 'bottom-0 text-white';
+  if (bot === 'b' && CP < 0) return 'top-0 text-black';
 
   return '';
 }
 
 export function evalBarClassName(percent: number, bot: string): number {
-  if (bot === 'black') return percent;
+  if (bot === 'b') return percent;
   else return 100 - percent;
 }
 

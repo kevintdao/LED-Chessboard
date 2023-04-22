@@ -20,8 +20,8 @@ interface OptionSquare {
 }
 
 interface KingPosition {
-  white: Square;
-  black: Square;
+  w: Square;
+  b: Square;
 }
 
 interface SocketMove {

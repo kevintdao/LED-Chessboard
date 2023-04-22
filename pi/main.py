@@ -1,10 +1,25 @@
 #!/usr/bin/env python3
-# import serial
+import serial
 import chess
 import re
+import time
 from firebase import db
 
 board = chess.Board()
+board.set_fen("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 1")
+picked_up = ['e2']
+
+
+LED_MAPPING = {
+    "a8": "56", "b8": "57", "c8": "58", "d8": "59", "e8": "60", "f8": "61", "g8": "62", "h8": "63",
+    "a7": "55", "b7": "54", "c7": "53", "d7": "52", "e7": "51", "f7": "50", "g7": "49", "h7": "48",
+    "a6": "40", "b6": "41", "c6": "42", "d6": "43", "e6": "44", "f6": "45", "g6": "46", "h6": "47",
+    "a5": "39", "b5": "38", "c5": "37", "d5": "36", "e5": "35", "f5": "34", "g5": "33", "h5": "32",
+    "a4": "24", "b4": "25", "c4": "26", "d4": "27", "e4": "28", "f4": "29", "g4": "30", "h4": "31",
+    "a3": "23", "b3": "22", "c3": "21", "d3": "20", "e3": "19", "f3": "18", "g3": "17", "h3": "16",
+    "a2":  "8", "b2":  "9", "c2": "10", "d2": "11", "e2": "12", "f2": "13", "g2": "14", "h2": "15",
+    "a1":  "7", "b1":  "6", "c1":  "5", "d1":  "4", "e1":  "3", "f1":  "2", "g1":  "1", "h1":  "0"
+}
 
 
 def move_listener(message):
@@ -66,14 +81,49 @@ def get_all_legal_moves(board: chess.Board) -> dict:
 
 
 if __name__ == '__main__':
-  # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-  # ser.reset_input_buffer()
-  # while True:
-  #   if ser.in_waiting > 0:
-  #     line = ser.readline().decode('utf-8').rstrip()
-  #     print(line)
-  print(board)
-  moves = get_all_legal_moves(board)
-  print(moves)
+  ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+  ser.reset_input_buffer()
+
+  while True:
+    moves = get_all_legal_moves(board)
+    led = " ".join([LED_MAPPING[move] for move in moves['f1']]) + "\n"
+    res = led.encode('utf-8')
+    print(res)
+    ser.write(res)
+    time.sleep(2)
+
+    led = " ".join([LED_MAPPING[move] for move in moves['d1']]) + "\n"
+    res = led.encode('utf-8')
+    print(res)
+    ser.write(res)
+    time.sleep(2)
+    # if ser.in_waiting > 0:
+    #   line = ser.readline().decode('utf-8').rstrip()
+
+    #   if (line.startswith('PU')):
+    #     square = line.split(' ')[1]
+    #     led = " ".join([LED_MAPPING[move] for move in moves[square]]) + "\n"
+    #     res = led.encode('utf-8')
+    #     print(res)
+    #     ser.write(res)
+
+  # square = line.split(' ')[1]
+  # moves = get_all_legal_moves(board)
+  # led = " ".join([LED_MAPPING[move] for move in moves['f1']]) + "\n"
+  # res = led.encode('utf-8')
+  # print(res)
+  # ser.write(res)
+  # time.sleep(1)
+
+  # moves = get_all_legal_moves(board)
+  # led = " ".join([LED_MAPPING[move] for move in moves[picked_up[0]]]) + "\n"
+
+  # print(led)
+  # print(LED_MAPPING[moves[picked_up[0]][1]])
+  # move = " ".join(moves[picked_up[0]]) + "\n"
+  # print(move)
+
+  # print(board)
+  # print(" ".join(moves[picked_up[0]]))
   # move_stream = db.child("moves").stream(move_listener)
   # turn_stream = db.child('turn').stream(turn_listener)

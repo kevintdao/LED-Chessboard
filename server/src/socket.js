@@ -1,6 +1,13 @@
 import { Chess } from 'chess.js';
 import { Server, Socket } from 'socket.io';
-import { onChildAdded, push, ref, update } from 'firebase/database';
+import {
+  get,
+  onChildAdded,
+  onValue,
+  push,
+  ref,
+  update,
+} from 'firebase/database';
 import { STOCKFISH_DEPTH, rooms } from './index.js';
 import { getBestMove, getStockfishMove } from './stockfish.js';
 import { database } from './index.js';
@@ -83,6 +90,7 @@ export const initializeSocket = (io) => {
  * @param {string} piece
  */
 function joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth) {
+  piece = piece === 'white' ? 'w' : 'b';
   let playerPiece = piece;
 
   if (!room) {
@@ -94,7 +102,7 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth) {
       users: [
         {
           id: user,
-          piece: piece ?? 'white',
+          piece: piece ?? 'w',
         },
       ],
       game,
@@ -108,11 +116,12 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth) {
 
     if (type === 'computer') {
       // update board in firebase
-      update(ref(database, '/'), { boardPiece: piece === 'white' ? 'w' : 'b' });
+      update(ref(database, '/'), { boardPiece: piece });
     }
 
     // firebase "moves" listener
     const moveRef = ref(database, 'moves');
+    const turnRef = ref(database, 'turn');
     onChildAdded(moveRef, (snapshot) => {
       const room = rooms.find((room) => room.id === roomId);
       const { game } = room;
@@ -127,13 +136,28 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth) {
 
       // update board
       if (room.type === 'multiplayer') {
-        socket.broadcast.emit('updateBoard', move);
+        io.emit('updateBoard', move);
+      }
+
+      if (room.type === 'computer') {
+        socket.emit('updateBoard', move);
+      }
+    });
+
+    onValue(turnRef, (snapshot) => {
+      const room = rooms.find((room) => room.id === roomId);
+
+      if (room.type === 'computer' && snapshot.val() !== piece) {
+        // wait 1 second before computer move
+        setTimeout(() => {
+          computerMove(io, room, roomId, room.depth);
+        }, 1000);
       }
     });
   } else {
     // get the player piece
     const existPlayerPiece = room.users[0].piece;
-    playerPiece = existPlayerPiece === 'white' ? 'black' : 'white';
+    playerPiece = existPlayerPiece === 'w' ? 'black' : 'white';
 
     // add player to room
     room.users.push({

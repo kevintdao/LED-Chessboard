@@ -16,7 +16,7 @@ export default function User({ name, color, captures, oppCaptures }: Props) {
       <div className="flex gap-2">
         {/* user profile image */}
         <img
-          src={color === 'w' ? WhiteUser : BlackUser}
+          src={color === 'white' ? WhiteUser : BlackUser}
           alt="profile"
           width="50px"
           className="rounded"

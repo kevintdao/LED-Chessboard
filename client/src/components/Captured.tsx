@@ -24,7 +24,7 @@ const sumValues = (obj: { [key: string]: number }) =>
   Object.values(obj).reduce((a: number, b: number) => a + b, 0);
 
 export default function Captured({ captures, oppCaptures, color }: Props) {
-  const pieces = color === 'w' ? blackPieces : whitePieces;
+  const pieces = color === 'white' ? blackPieces : whitePieces;
   // console.log(color);
   const capturesValue = calculateCapturesValue(captures, oppCaptures);
 

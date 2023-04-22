@@ -19,7 +19,7 @@ export default function EvalBar({ CP, boardOrientation }: Props) {
     <div
       className={classNames(
         'rounded-sm flex-1 w-6 text-black text-xs',
-        player === 'w' ? 'bg-[#edeed1]' : 'bg-[#779952]'
+        player === 'white' ? 'bg-[#edeed1]' : 'bg-[#779952]'
       )}
     >
       <div className="relative h-full">
@@ -28,7 +28,7 @@ export default function EvalBar({ CP, boardOrientation }: Props) {
         <div
           className={classNames(
             'rounded-sm h-2.5',
-            player === 'w' ? 'bg-[#779952]' : 'bg-[#edeed1]'
+            player === 'white' ? 'bg-[#779952]' : 'bg-[#edeed1]'
           )}
           style={{
             height: `${evalBarClassName(percent, player)}%`,

@@ -157,7 +157,7 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth) {
   } else {
     // get the player piece
     const existPlayerPiece = room.users[0].piece;
-    playerPiece = existPlayerPiece === 'w' ? 'black' : 'white';
+    playerPiece = existPlayerPiece === 'w' ? 'b' : 'w';
 
     // add player to room
     room.users.push({
@@ -165,6 +165,8 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth) {
       piece: playerPiece,
     });
   }
+
+  playerPiece = playerPiece === 'w' ? 'white' : 'black';
 
   // add user to firebase
   update(ref(database, `users/${playerPiece}`), {

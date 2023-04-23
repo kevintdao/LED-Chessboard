@@ -18,15 +18,15 @@
 
 // 1st 4 shift registers pins
 #define LOAD_PIN 7     // parallel load pin of 165
-#define CLOCK_PIN 6    // clock enable pin of 165
+#define CLOCK_PIN 6    // clock pin of 165
 #define DATA_PIN 5     // Q7 pin of 165
-#define CLOCK_EN_PIN 4 // clock pin of 165
+#define CLOCK_EN_PIN 4 // clock enable pin of 165
 
 // 2nd 4 shift registers pins
 #define LOAD_PIN_B 12    // parallel load pin of 165
-#define CLOCK_PIN_B 11   // clock enable pin of 165
+#define CLOCK_PIN_B 11   // clock pin of 165
 #define DATA_PIN_B 10    // Q7 pin of 165
-#define CLOCK_EN_PIN_B 9 // clock pin of 165
+#define CLOCK_EN_PIN_B 9 // clock enable pin of 165
 
 // How many NeoPixels are attached to the Arduino?
 #define LED_COUNT 64
@@ -171,13 +171,26 @@ void displayLegalMoves()
   strip.clear();
   strip.show();
 
-  // strip.setPixelColor(0, strip.Color(255, 0, 0));
-
   for (int i = 0; i < StringCount; i++)
   {
     strip.setPixelColor(strs[i].toInt(), strip.Color(255, 0, 0));
   }
   strip.show();
+}
+
+void get_pin_change(BYTES_VAL_T pinValues, BYTES_VAL_T oldPinValues)
+{
+  Serial.println("Change:");
+  for (int i = 0; i < DATA_WIDTH * 2; i++)
+  {
+    bool currPinValue = bitRead(pinValues, i);
+    bool oldPinValue = bitRead(oldPinValues, i);
+
+    if (currPinValue != oldPinValue)
+    {
+      Serial.println("PU " + String(i));
+    }
+  }
 }
 
 void setup()
@@ -230,7 +243,9 @@ void loop()
   // }
 
   // delay(POLL_DELAY_MSEC);
-  Serial.println("PU 12");
+
+  // testing serial communication
+  Serial.println("PU 1");
   delay(1000);
 
   if (Serial.available())
@@ -287,4 +302,12 @@ void loop()
 
   delay(100);
   displayLegalMoves();
+
+  // testing get_pin_change
+  // long long currPinValues = 0b1000000000000000000010000000000010000000000000000000100000000000;
+  // long long oldPinValues  = 0b110000000000000000001000000000011000000000000000000100000000000;
+
+  // get_pin_change(currPinValues, oldPinValues);
+
+  // delay(2000);
 }

@@ -7,7 +7,7 @@ from firebase import db
 
 board = chess.Board()
 # board.set_fen("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 1")
-picked_up = [1]
+picked_up = ['1']
 move_set = [['e2', 'e4']]
 
 
@@ -111,16 +111,36 @@ if __name__ == '__main__':
       if (line.startswith('PU')):
         pin = line.split(' ')[1]
 
-        # get the square from pin
-        square = [k for k, v in LED_MAPPING.items() if v == pin][0]
+        # add pin to picked_up array if not in it
+        if pin not in picked_up:
+          picked_up.append(pin)
+        else:
+          picked_up.remove(pin)
 
-        # led to light up
-        led = " ".join([LED_MAPPING[move] for move in moves[square]]) + "\n"
+        print(picked_up)
+        # check if pin picked up in in legal moves (piece is being taken)
+        if len(picked_up) == 2:
+          # remove the pin from picked up
+          pass
+        #   picked_up.remove(pin)
 
-        # send response to arduino
-        res = led.encode('utf-8')
-        ser.write(res)
-        print(res)
+        # a piece is picked up (display legal moves led)
+        if len(picked_up) == 1:
+          # get the square from pin
+          square = [k for k, v in LED_MAPPING.items() if v == pin][0]
+
+          # led to light up
+          led = " ".join([LED_MAPPING[move] for move in moves[square]]) + "\n"
+
+          # send response to arduino
+          res = led.encode('utf-8')
+          ser.write(res)
+          print(res)
+
+        # a piece is put back (clear leds)
+        if len(picked_up) == 0:
+          res = "\n".encode('utf-8')
+          ser.write(res)
 
   move_stream = db.child("moves").stream(move_listener)
   turn_stream = db.child('turn').stream(turn_listener)

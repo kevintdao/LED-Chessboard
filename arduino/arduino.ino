@@ -166,24 +166,6 @@ void display_pin_values()
   strip.show();
 }
 
-// void getChange(BYTES_VAL_T pinvalues, BYTES_VAL_T oldPinValues) {
-//     for(int i = 0; i < DATA_WIDTH; i++) {
-//         long currPinValue = pinValues >> i;
-//         long oldPinValue  = oldPinValues >> i;
-
-//         // check if the oldPinValue doesn't match the currPinValue (a piece is picked up/put down)
-//         if (oldPinValue != currPinValue) {
-//           // add the pin to the array
-//           if (currPinValue == 1) {
-//             pickedUp.push(i);
-//           } else {
-//             // remove the pin from the array
-//             pickedUp.remove(i);
-//           }
-//         }
-//     }
-// }
-
 void displayLegalMoves()
 {
   strip.clear();
@@ -222,7 +204,6 @@ void setup()
   // pinValues = read_shift_regs();
   // display_pin_values();
   // oldPinValues = pinValues;
-  // Serial.println("[Picked Up] e2");
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
@@ -249,6 +230,8 @@ void loop()
   // }
 
   // delay(POLL_DELAY_MSEC);
+  Serial.println("PU 12");
+  delay(1000);
 
   if (Serial.available())
   {
@@ -276,11 +259,32 @@ void loop()
   delay(100);
   displayLegalMoves();
 
-  // Serial.println("PU d1");
+  Serial.println("PU 1");
+  delay(1000);
 
-  // delay(5000);
+  if (Serial.available())
+  {
+    command = Serial.readStringUntil("\n");
+    command.trim();
 
-  // Serial.println("PU f1");
+    // Split the string into substrings
+    StringCount = 0;
+    while (command.length() > 0)
+    {
+      int index = command.indexOf(' ');
+      if (index == -1) // No space found
+      {
+        strs[StringCount++] = command;
+        break;
+      }
+      else
+      {
+        strs[StringCount++] = command.substring(0, index);
+        command = command.substring(index + 1);
+      }
+    }
+  }
 
-  // delay(5000);
+  delay(100);
+  displayLegalMoves();
 }

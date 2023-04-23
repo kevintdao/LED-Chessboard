@@ -6,8 +6,9 @@ import time
 from firebase import db
 
 board = chess.Board()
-board.set_fen("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 1")
-picked_up = ['e2']
+# board.set_fen("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 1")
+picked_up = [1]
+move_set = [['e2', 'e4']]
 
 
 LED_MAPPING = {
@@ -52,13 +53,13 @@ def add_move(fromSquare: str, toSquare: str):
       'to': toSquare
   })
 
-  # update turn
-  turn = 'w' if board.turn == chess.WHITE else 'b'
-  db.child('turn').set(turn)
-
   # make move on board
   move = chess.Move.from_uci(fromSquare + toSquare)
   board.push(move)
+
+  # update turn
+  turn = 'w' if board.turn else 'b'
+  db.child('turn').set(turn)
 
 
 def get_all_legal_moves(board: chess.Board) -> dict:
@@ -81,49 +82,45 @@ def get_all_legal_moves(board: chess.Board) -> dict:
 
 
 if __name__ == '__main__':
+  # initialize serial
   ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
   ser.reset_input_buffer()
 
   while True:
     moves = get_all_legal_moves(board)
-    led = " ".join([LED_MAPPING[move] for move in moves['f1']]) + "\n"
-    res = led.encode('utf-8')
-    print(res)
-    ser.write(res)
-    time.sleep(2)
+    # led = " ".join([LED_MAPPING[move] for move in moves['e2']]) + "\n"
+    # res = led.encode('utf-8')
+    # print(res)
+    # ser.write(res)
+    # time.sleep(2)
 
-    led = " ".join([LED_MAPPING[move] for move in moves['d1']]) + "\n"
-    res = led.encode('utf-8')
-    print(res)
-    ser.write(res)
-    time.sleep(2)
-    # if ser.in_waiting > 0:
-    #   line = ser.readline().decode('utf-8').rstrip()
+    # led = " ".join([LED_MAPPING[move] for move in moves['g1']]) + "\n"
+    # res = led.encode('utf-8')
+    # print(res)
+    # ser.write(res)
+    # time.sleep(2)
 
-    #   if (line.startswith('PU')):
-    #     square = line.split(' ')[1]
-    #     led = " ".join([LED_MAPPING[move] for move in moves[square]]) + "\n"
-    #     res = led.encode('utf-8')
-    #     print(res)
-    #     ser.write(res)
+    # add_move('e2', 'e4')
+    # time.sleep(10)
+    # add_move('g1', 'f3')
+    # time.sleep(10)
 
-  # square = line.split(' ')[1]
-  # moves = get_all_legal_moves(board)
-  # led = " ".join([LED_MAPPING[move] for move in moves['f1']]) + "\n"
-  # res = led.encode('utf-8')
-  # print(res)
-  # ser.write(res)
-  # time.sleep(1)
+    if ser.in_waiting > 0:
+      line = ser.readline().decode('utf-8').rstrip()
 
-  # moves = get_all_legal_moves(board)
-  # led = " ".join([LED_MAPPING[move] for move in moves[picked_up[0]]]) + "\n"
+      if (line.startswith('PU')):
+        pin = line.split(' ')[1]
 
-  # print(led)
-  # print(LED_MAPPING[moves[picked_up[0]][1]])
-  # move = " ".join(moves[picked_up[0]]) + "\n"
-  # print(move)
+        # get the square from pin
+        square = [k for k, v in LED_MAPPING.items() if v == pin][0]
 
-  # print(board)
-  # print(" ".join(moves[picked_up[0]]))
-  # move_stream = db.child("moves").stream(move_listener)
-  # turn_stream = db.child('turn').stream(turn_listener)
+        # led to light up
+        led = " ".join([LED_MAPPING[move] for move in moves[square]]) + "\n"
+
+        # send response to arduino
+        res = led.encode('utf-8')
+        ser.write(res)
+        print(res)
+
+  move_stream = db.child("moves").stream(move_listener)
+  turn_stream = db.child('turn').stream(turn_listener)

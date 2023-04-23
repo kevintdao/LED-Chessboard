@@ -46,13 +46,13 @@ export default function Home() {
               </button>
 
               {/* against computer */}
-              <button
+              {/* <button
                 onClick={() => setPlayComputerOpen(true)}
                 className="text-white bg-dark-400 rounded-md p-2 flex flex-col items-center flex-1 hover:bg-dark-200"
               >
                 <img src={Computer} alt="computer" className="w-16 h-16" />
                 <span>Play Computer</span>
-              </button>
+              </button> */}
             </div>
           </div>
 

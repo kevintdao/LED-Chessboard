@@ -11,7 +11,7 @@ import { initializeSocket } from './socket.js';
 import { startStockfish, startStockfishComputer } from './stockfish.js';
 
 import { initializeApp } from 'firebase/app';
-import { getDatabase, onChildAdded, onValue, ref } from 'firebase/database';
+import { getDatabase } from 'firebase/database';
 import { initializeDB } from './firebase.js';
 
 // Your web app's Firebase configuration

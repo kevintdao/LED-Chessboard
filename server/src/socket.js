@@ -1,13 +1,6 @@
 import { Chess } from 'chess.js';
 import { Server, Socket } from 'socket.io';
-import {
-  get,
-  onChildAdded,
-  onValue,
-  push,
-  ref,
-  update,
-} from 'firebase/database';
+import { onChildAdded, push, ref, update } from 'firebase/database';
 import { STOCKFISH_DEPTH, rooms } from './index.js';
 import { getBestMove, getStockfishMove } from './stockfish.js';
 import { database } from './index.js';
@@ -59,8 +52,11 @@ export const initializeSocket = (io) => {
 
       // update firebase
       push(ref(database, `moves`), { from: data.from, to: data.to });
-      push(ref(database, 'fen'), { fen: game.fen() });
-      update(ref(database, '/'), { turn: game.turn(), showHint: false });
+      update(ref(database, '/'), {
+        turn: game.turn(),
+        showHint: false,
+        fen: game.fen(),
+      });
 
       computeCP(io, room, roomId);
 
@@ -122,7 +118,7 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth) {
     // firebase "moves" listener
     const moveRef = ref(database, 'moves');
     const turnRef = ref(database, 'turn');
-    onChildAdded(moveRef, (snapshot) => {
+    onChildAdded(moveRef, async (snapshot) => {
       const room = rooms.find((room) => room.id === roomId);
       const { game } = room;
       const move = snapshot.val();
@@ -141,17 +137,6 @@ function joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth) {
 
       if (room.type === 'computer') {
         socket.emit('updateBoard', move);
-      }
-    });
-
-    onValue(turnRef, (snapshot) => {
-      const room = rooms.find((room) => room.id === roomId);
-
-      if (room.type === 'computer' && snapshot.val() !== piece) {
-        // wait 1 second before computer move
-        setTimeout(() => {
-          computerMove(io, room, roomId, room.depth);
-        }, 1000);
       }
     });
   } else {
@@ -195,8 +180,11 @@ async function computerMove(io, room, roomId, depth) {
 
   // update firebase
   push(ref(database, `moves`), { from, to });
-  push(ref(database, 'fen'), { fen: game.fen() });
-  update(ref(database, '/'), { turn: game.turn(), showHint: false });
+  update(ref(database, '/'), {
+    turn: game.turn(),
+    showHint: false,
+    fen: game.fen(),
+  });
 
   // update board
   io.in(roomId).emit('updateBoardComputer', { from, to, CP });

@@ -37,32 +37,12 @@
 // int       = 16 bits
 // long      = 32 bits
 // long long = 64 bits
-#define BYTES_VAL_T unsigned long long
+#define BYTES_VAL_T unsigned long
 
-// chessboard mapping
-String CHESS_MAPPING[64] = {
-    "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
-    "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
-    "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
-    "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
-    "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
-    "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
-    "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"};
-
-// led mapping
-int LED_MAPPING[64] = {
-    56, 57, 58, 59, 60, 61, 62, 63,
-    55, 54, 53, 52, 51, 50, 49, 48,
-    40, 41, 42, 43, 44, 45, 46, 47,
-    39, 38, 37, 36, 35, 34, 33, 32,
-    24, 25, 26, 27, 28, 29, 30, 31,
-    23, 22, 21, 20, 19, 18, 17, 16,
-    8, 9, 10, 11, 12, 13, 14, 15,
-    7, 6, 5, 4, 3, 2, 1, 0};
-
-BYTES_VAL_T pinValues;
-BYTES_VAL_T oldPinValues;
+BYTES_VAL_T pinValues1;
+BYTES_VAL_T pinValues2;
+BYTES_VAL_T oldPinValues1;
+BYTES_VAL_T oldPinValues2;
 
 String command;
 String strs[20];
@@ -118,9 +98,7 @@ BYTES_VAL_T read_shift_regs_b()
   digitalWrite(LOAD_PIN_B, HIGH);
   digitalWrite(CLOCK_EN_PIN_B, LOW);
 
-  /* Loop to read each bit value from the serial out line
-   * of the SN74HC165N.
-   */
+  // Loop to read each bit value from the serial out line of the SN74HC165N.
   for (int i = 0; i < DATA_WIDTH; i++)
   {
     bitVal = digitalRead(DATA_PIN_B);
@@ -142,13 +120,14 @@ void display_pin_values()
 {
   Serial.print("Pin States:\r\n");
 
+  // first 32 pins
   for (int i = 0; i < DATA_WIDTH; i++)
   {
     Serial.print("  Pin-");
     Serial.print(i);
     Serial.print(": ");
 
-    if ((pinValues >> i) & 1)
+    if ((pinValues1 >> i) & 1)
     {
       Serial.print("HIGH");
       strip.setPixelColor(i, strip.Color(0, 0, 0));
@@ -158,7 +137,26 @@ void display_pin_values()
       Serial.print("LOW");
       strip.setPixelColor(i, strip.Color(255, 0, 0));
     }
+    Serial.print("\r\n");
+  }
 
+  // second 32 pins
+    for (int i = 0; i < DATA_WIDTH; i++)
+  {
+    Serial.print("  Pin-");
+    Serial.print(i + 32);
+    Serial.print(": ");
+
+    if ((pinValues2 >> i) & 1)
+    {
+      Serial.print("HIGH");
+      strip.setPixelColor(i + 32, strip.Color(0, 0, 0));
+    }
+    else
+    {
+      Serial.print("LOW");
+      strip.setPixelColor(i + 32, strip.Color(255, 0, 0));
+    }
     Serial.print("\r\n");
   }
 
@@ -181,7 +179,7 @@ void displayLegalMoves()
 void get_pin_change(BYTES_VAL_T pinValues, BYTES_VAL_T oldPinValues)
 {
   Serial.println("Change:");
-  for (int i = 0; i < DATA_WIDTH * 2; i++)
+  for (int i = 0; i < DATA_WIDTH; i++)
   {
     bool currPinValue = bitRead(pinValues, i);
     bool oldPinValue = bitRead(oldPinValues, i);
@@ -214,9 +212,12 @@ void setup()
   digitalWrite(LOAD_PIN_B, HIGH);
 
   /* Read in and display the pin states at startup */
-  // pinValues = read_shift_regs();
-  // display_pin_values();
-  // oldPinValues = pinValues;
+  pinValues1 = read_shift_regs();
+  pinValues2 = read_shift_regs_b();
+
+  display_pin_values();
+  oldPinValues1 = pinValues1;
+  oldPinValues2 = pinValues2;
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
@@ -225,83 +226,86 @@ void setup()
 
 void loop()
 {
-  // /* Read the state of all zones.*/
-  // pinValues = read_shift_regs();
+  /* Read the state of all zones.*/
+  pinValues1 = read_shift_regs();
 
-  // // shift pinsValues by 32 bits to the left
-  // pinValues = pinValues << 32;
+  // read the state of the second shift register
+  pinValues2 = read_shift_regs_b();
 
-  // // read the state of the second shift register
-  // pinValues |= read_shift_regs_b();
+  /* If there was a chage in state, display which ones changed */
+  if (pinValues1 != oldPinValues1)
+  {
+    Serial.print("*Pin value change detected*\r\n");
+    display_pin_values();
+    oldPinValues1 = pinValues1;
+  }
 
-  // /* If there was a chage in state, display which ones changed */
-  // if (pinValues != oldPinValues)
-  // {
-  //   Serial.print("*Pin value change detected*\r\n");
-  //   display_pin_values();
-  //   oldPinValues = pinValues;
-  // }
+  if (pinValues2 != oldPinValues2) {
+    Serial.print("*Pin value change detected*\r\n");
+    display_pin_values();
+    oldPinValues2 = pinValues2;
+  }
 
   // delay(POLL_DELAY_MSEC);
 
   // testing serial communication
-  Serial.println("PU 1");
-  delay(1000);
+  // Serial.println("up 1");
+  // delay(1000);
 
-  if (Serial.available())
-  {
-    command = Serial.readStringUntil("\n");
-    command.trim();
+  // if (Serial.available())
+  // {
+  //   command = Serial.readStringUntil("\n");
+  //   command.trim();
 
-    // Split the string into substrings
-    StringCount = 0;
-    while (command.length() > 0)
-    {
-      int index = command.indexOf(' ');
-      if (index == -1) // No space found
-      {
-        strs[StringCount++] = command;
-        break;
-      }
-      else
-      {
-        strs[StringCount++] = command.substring(0, index);
-        command = command.substring(index + 1);
-      }
-    }
-  }
+  //   // Split the string into substrings
+  //   StringCount = 0;
+  //   while (command.length() > 0)
+  //   {
+  //     int index = command.indexOf(' ');
+  //     if (index == -1) // No space found
+  //     {
+  //       strs[StringCount++] = command;
+  //       break;
+  //     }
+  //     else
+  //     {
+  //       strs[StringCount++] = command.substring(0, index);
+  //       command = command.substring(index + 1);
+  //     }
+  //   }
+  // }
 
-  delay(100);
-  displayLegalMoves();
+  // delay(100);
+  // displayLegalMoves();
 
-  Serial.println("PU 1");
-  delay(1000);
+  // Serial.println("down 1");
+  // delay(1000);
 
-  if (Serial.available())
-  {
-    command = Serial.readStringUntil("\n");
-    command.trim();
+  // if (Serial.available())
+  // {
+  //   command = Serial.readStringUntil("\n");
+  //   command.trim();
 
-    // Split the string into substrings
-    StringCount = 0;
-    while (command.length() > 0)
-    {
-      int index = command.indexOf(' ');
-      if (index == -1) // No space found
-      {
-        strs[StringCount++] = command;
-        break;
-      }
-      else
-      {
-        strs[StringCount++] = command.substring(0, index);
-        command = command.substring(index + 1);
-      }
-    }
-  }
+  //   // Split the string into substrings
+  //   StringCount = 0;
+  //   while (command.length() > 0)
+  //   {
+  //     int index = command.indexOf(' ');
+  //     if (index == -1) // No space found
+  //     {
+  //       strs[StringCount++] = command;
+  //       break;
+  //     }
+  //     else
+  //     {
+  //       strs[StringCount++] = command.substring(0, index);
+  //       command = command.substring(index + 1);
+  //     }
+  //   }
+  // }
 
-  delay(100);
-  displayLegalMoves();
+  // delay(100);
+  // displayLegalMoves();
 
   // testing get_pin_change
   // long long currPinValues = 0b1000000000000000000010000000000010000000000000000000100000000000;

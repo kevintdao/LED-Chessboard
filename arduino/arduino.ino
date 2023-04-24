@@ -118,49 +118,65 @@ BYTES_VAL_T read_shift_regs_b()
 /* Dump the list of zones along with their current status.*/
 void display_pin_values()
 {
-  Serial.print("Pin States:\r\n");
+  // Serial.print("Pin States:\r\n");
 
   // first 32 pins
   for (int i = 0; i < DATA_WIDTH; i++)
   {
-    Serial.print("  Pin-");
-    Serial.print(i);
-    Serial.print(": ");
+    // Serial.print("  Pin-");
+    // Serial.print(i);
+    // Serial.print(": ");
+    bool currPinValue = bitRead(pinValues1, i);
+    bool oldPinValue = bitRead(oldPinValues1, i);
 
-    if ((pinValues1 >> i) & 1)
-    {
-      Serial.print("HIGH");
-      strip.setPixelColor(i, strip.Color(0, 0, 0));
-    }
-    else
-    {
-      Serial.print("LOW");
-      strip.setPixelColor(i, strip.Color(255, 0, 0));
-    }
-    Serial.print("\r\n");
+    // put down
+    if (currPinValue != oldPinValue) {
+      if (currPinValue)
+      {
+        Serial.println("down " + String(i));
+        // Serial.print("HIGH");
+        // strip.setPixelColor(i, strip.Color(0, 0, 0));
+      }
+      // picked up
+      else
+      {
+        Serial.println("up " + String(i));
+        // Serial.print("LOW");
+        // strip.setPixelColor(i, strip.Color(255, 0, 0));
+      }
+      // Serial.print("\r\n");
+      }
   }
 
   // second 32 pins
-    for (int i = 0; i < DATA_WIDTH; i++)
+  for (int i = 0; i < DATA_WIDTH; i++)
   {
-    Serial.print("  Pin-");
-    Serial.print(i + 32);
-    Serial.print(": ");
+    // Serial.print("  Pin-");
+    // Serial.print(i + 32);
+    // Serial.print(": ");
+    bool currPinValue = bitRead(pinValues2, i);
+    bool oldPinValue = bitRead(oldPinValues2, i);
 
-    if ((pinValues2 >> i) & 1)
-    {
-      Serial.print("HIGH");
-      strip.setPixelColor(i + 32, strip.Color(0, 0, 0));
+    // put down
+    if (currPinValue != oldPinValue) {
+      if (currPinValue)
+      {
+        Serial.println("down " + String(i + 32));
+        // Serial.print("HIGH");
+        // strip.setPixelColor(i + 32, strip.Color(0, 0, 0));
+      }
+      // picked up
+      else
+      {
+        Serial.println("up " + String(i + 32));
+        // Serial.print("LOW");
+        // strip.setPixelColor(i + 32, strip.Color(255, 0, 0));
+      }
     }
-    else
-    {
-      Serial.print("LOW");
-      strip.setPixelColor(i + 32, strip.Color(255, 0, 0));
-    }
-    Serial.print("\r\n");
+    // Serial.print("\r\n");
   }
 
-  Serial.print("\r\n");
+  // Serial.print("\r\n");
   strip.show();
 }
 
@@ -233,50 +249,45 @@ void loop()
   pinValues2 = read_shift_regs_b();
 
   /* If there was a chage in state, display which ones changed */
-  if (pinValues1 != oldPinValues1)
+  if (pinValues1 != oldPinValues1 || pinValues2 != oldPinValues2)
   {
-    Serial.print("*Pin value change detected*\r\n");
+    // Serial.print("*Pin value change detected*\r\n");
     display_pin_values();
     oldPinValues1 = pinValues1;
-  }
-
-  if (pinValues2 != oldPinValues2) {
-    Serial.print("*Pin value change detected*\r\n");
-    display_pin_values();
     oldPinValues2 = pinValues2;
   }
 
-  // delay(POLL_DELAY_MSEC);
+  delay(POLL_DELAY_MSEC);
 
   // testing serial communication
   // Serial.println("up 1");
   // delay(1000);
 
-  // if (Serial.available())
-  // {
-  //   command = Serial.readStringUntil("\n");
-  //   command.trim();
+  if (Serial.available())
+  {
+    command = Serial.readStringUntil("\n");
+    command.trim();
 
-  //   // Split the string into substrings
-  //   StringCount = 0;
-  //   while (command.length() > 0)
-  //   {
-  //     int index = command.indexOf(' ');
-  //     if (index == -1) // No space found
-  //     {
-  //       strs[StringCount++] = command;
-  //       break;
-  //     }
-  //     else
-  //     {
-  //       strs[StringCount++] = command.substring(0, index);
-  //       command = command.substring(index + 1);
-  //     }
-  //   }
-  // }
+    // Split the string into substrings
+    StringCount = 0;
+    while (command.length() > 0)
+    {
+      int index = command.indexOf(' ');
+      if (index == -1) // No space found
+      {
+        strs[StringCount++] = command;
+        break;
+      }
+      else
+      {
+        strs[StringCount++] = command.substring(0, index);
+        command = command.substring(index + 1);
+      }
+    }
+  }
 
-  // delay(100);
-  // displayLegalMoves();
+  delay(100);
+  displayLegalMoves();
 
   // Serial.println("down 1");
   // delay(1000);

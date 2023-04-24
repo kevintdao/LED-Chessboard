@@ -96,6 +96,15 @@ if __name__ == '__main__':
   ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
   ser.reset_input_buffer()
 
+  # add_move('e2', 'e4')
+  # time.sleep(10)
+  # add_move('f1', 'c4')
+  # time.sleep(10)
+  # add_move('d1', 'h5')
+  # time.sleep(10)
+  # add_move('h5', 'f7')
+  # time.sleep(10)
+
   while True:
     moves = get_all_legal_moves(board)
     # led = " ".join([LED_MAPPING[move] for move in moves['e2']]) + "\n"
@@ -110,42 +119,37 @@ if __name__ == '__main__':
     # ser.write(res)
     # time.sleep(2)
 
-    # add_move('e2', 'e4')
-    # time.sleep(10)
-    # add_move('g1', 'f3')
-    # time.sleep(10)
-    # add_move('d2', 'd4')
-    # time.sleep(10)
-
     if ser.in_waiting > 0:
       line = ser.readline().decode('utf-8').rstrip()
 
-      if (line.startswith('PU')):
+      # piece is picked up
+      if line.startswith('up'):
         pin = get_pin_mapping(int(line.split(' ')[1]))
+
+        print(f'Pin {pin} is picked up')
+
+        # get the square from pin
+        square = [k for k, v in LED_MAPPING.items() if v == pin][0]
 
         # add pin to picked_up array if not in it
         if pin not in picked_up:
           picked_up.append(pin)
-        else:
-          picked_up.remove(pin)
 
-        print(picked_up)
         # check if pin picked up in in legal moves (piece is being taken)
         if len(picked_up) == 2:
-          # remove the pin from picked up
           pass
-        #   picked_up.remove(pin)
+          # remove the pin from picked up
+          # if picked_up in moves[square]:
+          #   picked_up.remove(pin)
+          #   break
 
-        # a piece is picked up (display legal moves led)
+          # a piece is picked up (display legal moves led)
         if len(picked_up) == 1:
-          # get the square from pin
-          square = [k for k, v in LED_MAPPING.items() if v == pin][0]
-
           # led to light up
           led = " ".join([str(LED_MAPPING[move])
                          for move in moves[square]]) + "\n"
 
-          # send response to arduino
+          # send led of legal moves to arduino
           res = led.encode('utf-8')
           ser.write(res)
           print(res)
@@ -154,6 +158,27 @@ if __name__ == '__main__':
         if len(picked_up) == 0:
           res = "\n".encode('utf-8')
           ser.write(res)
+
+      # piece is put down
+      if line.startswith('down'):
+        pin = get_pin_mapping(int(line.split(' ')[1]))
+
+        print(f'Pin {pin} is put down')
+
+        # get the square from pin
+        square = [k for k, v in LED_MAPPING.items() if v == pin][0]
+
+        # check if pin is in picked up (the same piece is put down)
+        if pin in picked_up:
+          picked_up.remove(pin)
+
+        # check if pin is not in picked up (piece is moved to difference square)
+        if pin not in picked_up:
+          # call add move function
+          pass
+
+        res = "\n".encode('utf-8')
+        ser.write(res)
 
   move_stream = db.child("moves").stream(move_listener)
   turn_stream = db.child('turn').stream(turn_listener)

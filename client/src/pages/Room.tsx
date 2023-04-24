@@ -300,6 +300,14 @@ export default function Room() {
         <Right game={game} handleHint={handleHint} gameOver={gameOver} />
       </div>
 
+      <div className="sm:mx-0 mx-2">
+        <div className="bg-dark-300 p-2 rounded-md flex justify-center">
+          <span>
+            <span className="font-semibold">FEN:</span> {game.fen()}
+          </span>
+        </div>
+      </div>
+
       {/* game over dialog */}
       <GameOverDialog
         user={pieceColor}

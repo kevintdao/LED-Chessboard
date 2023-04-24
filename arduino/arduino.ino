@@ -129,18 +129,18 @@ void display_pin_values()
     bool currPinValue = bitRead(pinValues1, i);
     bool oldPinValue = bitRead(oldPinValues1, i);
 
-    // put down
     if (currPinValue != oldPinValue) {
+      // picked up
       if (currPinValue)
       {
-        Serial.println("down " + String(i));
+        Serial.println("up " + String(i));
         // Serial.print("HIGH");
         // strip.setPixelColor(i, strip.Color(0, 0, 0));
       }
-      // picked up
+      // put down
       else
       {
-        Serial.println("up " + String(i));
+        Serial.println("down " + String(i));
         // Serial.print("LOW");
         // strip.setPixelColor(i, strip.Color(255, 0, 0));
       }
@@ -157,18 +157,18 @@ void display_pin_values()
     bool currPinValue = bitRead(pinValues2, i);
     bool oldPinValue = bitRead(oldPinValues2, i);
 
-    // put down
     if (currPinValue != oldPinValue) {
+      // picked up
       if (currPinValue)
       {
-        Serial.println("down " + String(i + 32));
+        Serial.println("up " + String(i + 32));
         // Serial.print("HIGH");
         // strip.setPixelColor(i + 32, strip.Color(0, 0, 0));
       }
-      // picked up
+      // put down
       else
       {
-        Serial.println("up " + String(i + 32));
+        Serial.println("down " + String(i + 32));
         // Serial.print("LOW");
         // strip.setPixelColor(i + 32, strip.Color(255, 0, 0));
       }
@@ -180,14 +180,20 @@ void display_pin_values()
   strip.show();
 }
 
-void displayLegalMoves()
+void displayLeds()
 {
   strip.clear();
   strip.show();
 
-  for (int i = 0; i < StringCount; i++)
+  String c = strs[0];
+  for (int i = 1; i < StringCount; i++)
   {
-    strip.setPixelColor(strs[i].toInt(), strip.Color(255, 0, 0));
+    if (c == "LM") {
+      strip.setPixelColor(strs[i].toInt(), strip.Color(0, 255, 0));
+    }
+    else if (c == "PM") {
+      strip.setPixelColor(strs[i].toInt(), strip.Color(255, 255, 0));
+    }
   }
   strip.show();
 }
@@ -231,13 +237,13 @@ void setup()
   pinValues1 = read_shift_regs();
   pinValues2 = read_shift_regs_b();
 
-  display_pin_values();
+  // display_pin_values();
   oldPinValues1 = pinValues1;
   oldPinValues2 = pinValues2;
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
-  strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+  strip.setBrightness(25); // Set BRIGHTNESS to about 1/5 (max = 255)
 }
 
 void loop()
@@ -287,7 +293,7 @@ void loop()
   }
 
   delay(100);
-  displayLegalMoves();
+  displayLeds();
 
   // Serial.println("down 1");
   // delay(1000);

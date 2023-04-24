@@ -6,7 +6,8 @@ import time
 from firebase import db
 
 board = chess.Board()
-# board.set_fen("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 1")
+board.set_fen(
+    "r1bqkbnr/ppp2ppp/2np4/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 2 4")
 picked_up = []
 move_set = [['e2', 'e4']]
 
@@ -35,7 +36,10 @@ def move_listener(message):
 
   # convert move into chess
   move = chess.Move.from_uci(moveFrom + moveTo)
-  board.push(move)  # Make the move
+  try:
+    board.push(move)  # Make the move
+  except:
+    print('error')
 
   print('Move:', move)
   print(board)
@@ -46,20 +50,34 @@ def turn_listener(message):
   print('Turn:', data)
 
 
-def add_move(fromSquare: str, toSquare: str):
+def fen_listener(message):
+  data = message['data']
+  board.set_fen(data)
+
+
+def add_move(from_square: str, to_square: str):
   # add move to firebase
   db.child('moves').push({
-      'from': fromSquare,
-      'to': toSquare
+      'from': from_square,
+      'to': to_square
   })
 
   # make move on board
-  move = chess.Move.from_uci(fromSquare + toSquare)
+  move = chess.Move.from_uci(from_square + to_square)
   board.push(move)
 
   # update turn
   turn = 'w' if board.turn else 'b'
   db.child('turn').set(turn)
+
+  prev_move = [from_square, to_square]
+  led = "PM "
+  led += " ".join([str(LED_MAPPING[move])
+                  for move in prev_move]) + "\n"
+
+  # display move
+  res = led.encode('utf-8')
+  ser.write(res)
 
 
 def get_all_legal_moves(board: chess.Board) -> dict:
@@ -105,6 +123,8 @@ if __name__ == '__main__':
   # add_move('h5', 'f7')
   # time.sleep(10)
 
+  # fen_stream = db.child('fen').stream(fen_listener)
+
   while True:
     moves = get_all_legal_moves(board)
     # led = " ".join([LED_MAPPING[move] for move in moves['e2']]) + "\n"
@@ -146,8 +166,9 @@ if __name__ == '__main__':
           # a piece is picked up (display legal moves led)
         if len(picked_up) == 1:
           # led to light up
-          led = " ".join([str(LED_MAPPING[move])
-                         for move in moves[square]]) + "\n"
+          led = "LM "
+          led += " ".join([str(LED_MAPPING[move])
+                           for move in moves[square]]) + "\n"
 
           # send led of legal moves to arduino
           res = led.encode('utf-8')
@@ -173,9 +194,25 @@ if __name__ == '__main__':
           picked_up.remove(pin)
 
         # check if pin is not in picked up (piece is moved to difference square)
-        if pin not in picked_up:
+        if len(picked_up) != 0 and pin not in picked_up:
+          # convert pins into square
+          from_square = [k for k, v in LED_MAPPING.items() if v ==
+                         picked_up[0]][0]
+          to_square = [k for k, v in LED_MAPPING.items() if v == pin][0]
+
+          # check if move is legal
+          if to_square not in moves[from_square]:
+            print('Illegal move')
+            print(picked_up)
+            continue
+
           # call add move function
-          pass
+          print(
+              f'Move from {picked_up[0]} ({from_square}) to {pin} ({to_square})')
+          add_move(from_square, to_square)
+
+          # clear picked up
+          picked_up = []
 
         res = "\n".encode('utf-8')
         ser.write(res)

@@ -185,6 +185,7 @@ export default function Room() {
     if (game.isGameOver()) {
       setGameOver(gameOverType(game, undefined));
       setIsGameOverOpen(true);
+      setOptionSquares({});
     }
 
     // check if king of the current player is in check
@@ -296,7 +297,7 @@ export default function Room() {
         </div>
 
         {/* right side components */}
-        <Right game={game} handleHint={handleHint} />
+        <Right game={game} handleHint={handleHint} gameOver={gameOver} />
       </div>
 
       {/* game over dialog */}

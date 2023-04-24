@@ -39,7 +39,7 @@ export default function Root() {
   return (
     <div className="flex flex-col h-screen space-y-2">
       <header>
-        <nav className="relative w-full flex flex-wrap items-center justify-between py-3 bg-dark-400 text-white hover:text-gray-700 focus:text-gray-700 shadow-lg h-16">
+        <nav className="relative w-full flex flex-wrap items-center justify-between py-3 bg-dark-400 text-white hover:text-gray-700 focus:text-gray-700 h-16">
           <div className="container-fluid w-full flex flex-wrap items-center justify-between px-4">
             <div className="container-fluid">
               <Link

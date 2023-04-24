@@ -14,7 +14,18 @@ export function CPClassName(bot: string, CP: number) {
   return '';
 }
 
-export function evalBarClassName(percent: number, bot: string): number {
+export function evalBarClassName(
+  percent: number,
+  bot: string,
+  mate?: number
+): number {
+  if (mate) {
+    if (bot === 'white' && mate < 0) return 0;
+    if (bot === 'white' && mate > 0) return 100;
+    if (bot === 'black' && mate > 0) return 0;
+    if (bot === 'black' && mate < 0) return 100;
+  }
+
   if (bot === 'black') return percent;
   else return 100 - percent;
 }

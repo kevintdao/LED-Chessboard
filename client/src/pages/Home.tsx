@@ -26,7 +26,7 @@ export default function Home() {
     <div className="container mx-auto">
       {user ? (
         <div className="flex items-center flex-col gap-2">
-          <div className="bg-dark-300 p-4 rounded-md w-[480px] space-y-4">
+          <div className="bg-dark-300 p-4 rounded-md w-[280px] space-y-4">
             <div className="text-white text-2xl text-center font-bold">
               Play
             </div>

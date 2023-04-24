@@ -3,6 +3,7 @@ import EvalScore from './EvalScore';
 
 interface Props {
   CP: number;
+  mate?: number;
   boardOrientation: string;
 }
 
@@ -11,7 +12,7 @@ export function normalizeCP(cp: number): number {
   return (1 / dem) * 100;
 }
 
-export default function EvalBar({ CP, boardOrientation }: Props) {
+export default function EvalBar({ CP, mate, boardOrientation }: Props) {
   const player = boardOrientation;
   const percent = normalizeCP(CP);
 
@@ -23,7 +24,7 @@ export default function EvalBar({ CP, boardOrientation }: Props) {
       )}
     >
       <div className="relative h-full">
-        <EvalScore CP={CP} bot={player} />
+        <EvalScore CP={CP} mate={mate} bot={player} />
 
         <div
           className={classNames(
@@ -31,7 +32,7 @@ export default function EvalBar({ CP, boardOrientation }: Props) {
             player === 'white' ? 'bg-[#779952]' : 'bg-[#edeed1]'
           )}
           style={{
-            height: `${evalBarClassName(percent, player)}%`,
+            height: `${evalBarClassName(percent, player, mate)}%`,
             transition: '1s ease',
           }}
         ></div>

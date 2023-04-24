@@ -35,10 +35,10 @@ export function finishAnalysis(message) {
 // get best move from stockfish message
 export function onMessageListener(message) {
   if (finishAnalysis(message)) {
-    // console.log(message, '\n');
+    console.log(message, '\n');
 
     finished = true;
-    const re = /cp [-\d]+|mate [\d]+|(?<!\w)pv [\w\d]+/g;
+    const re = /cp [-\d]+|mate [-\d]+|(?<!\w)pv [\w\d]+/g;
     const stockfishMessage = message.match(re);
 
     if (stockfishMessage) {
@@ -88,6 +88,7 @@ export async function getBestMove(fen, depth) {
 // get stockfish move
 export async function getStockfishMove(fen, depth) {
   finished = false;
+  CP = undefined;
   mate = undefined;
   engine.postMessage(`position fen ${fen}`);
   engine.postMessage(`go depth ${depth}`);

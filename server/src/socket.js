@@ -200,5 +200,7 @@ async function computeCP(io, room, roomId) {
   const { game } = room;
 
   const { CP, mate } = await getStockfishMove(game.fen(), 15);
-  io.in(roomId).emit('updateCP', CP || mate);
+
+  io.in(roomId).emit('updateCP', CP);
+  io.in(roomId).emit('updateMate', mate);
 }

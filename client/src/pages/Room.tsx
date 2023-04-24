@@ -55,6 +55,7 @@ export default function Room() {
     b: initialCaptures,
   });
   const [CP, setCP] = useState(0);
+  const [mate, setMate] = useState<number | undefined>(undefined);
 
   // square highlight states
   const [optionSquares, setOptionSquares] = useState<OptionSquare>({});
@@ -150,8 +151,9 @@ export default function Room() {
   }
 
   const handleUpdateBoard = (data: SocketMove) => {
-    console.log(data.CP);
-    makeMove(data.from, data.to);
+    try {
+      makeMove(data.from, data.to);
+    } catch (err) {} // eslint-disable-line
     setCP(turn === 'w' ? -data.CP : data.CP);
   };
 
@@ -160,12 +162,16 @@ export default function Room() {
     setCP(turn === 'w' ? -CP : CP);
   };
 
+  const handleUpdateMate = (mate: number) => {
+    console.log(mate);
+    setMate(turn === 'w' ? -mate : mate);
+  };
+
   const handleUpdateHint = (data: SocketMove) => {
     setHintArrow([[data.from, data.to]]);
   };
 
   const handleUpdatePiece = (piece: BoardOrientation) => {
-    console.log(piece);
     setPieceColor(piece);
   };
 
@@ -208,6 +214,7 @@ export default function Room() {
     socket?.on('updateBoard', handleUpdateBoard);
     socket?.on('updateBoardComputer', handleUpdateBoard);
     socket?.on('updateCP', handleUpdateCP);
+    socket?.on('updateMate', handleUpdateMate);
     socket?.on('updateHint', handleUpdateHint);
     socket?.on('updatePiece', handleUpdatePiece);
 
@@ -215,10 +222,17 @@ export default function Room() {
       socket?.off('updateBoard', handleUpdateBoard);
       socket?.off('updateBoardComputer', handleUpdateBoard);
       socket?.off('updateCP', handleUpdateCP);
+      socket?.off('updateMate', handleUpdateMate);
       socket?.off('updateHint', handleUpdateHint);
       socket?.off('updatePiece', handleUpdatePiece);
     };
-  }, [socket, handleUpdateBoard, handleUpdateCP, handleUpdateHint]);
+  }, [
+    socket,
+    handleUpdateBoard,
+    handleUpdateCP,
+    handleUpdateMate,
+    handleUpdateHint,
+  ]);
 
   const oppPieceColor = pieceColor === 'white' ? 'black' : 'white';
   const name = pieceColor === 'white' ? 'White' : 'Black';
@@ -228,7 +242,13 @@ export default function Room() {
     <div className="text-white container mx-auto py-1 space-y-2">
       <div className="flex justify-center gap-0 sm:gap-2">
         {/* left */}
-        <Left gameOver={gameOver} turn={turn} CP={CP} pieceColor={pieceColor} />
+        <Left
+          gameOver={gameOver}
+          turn={turn}
+          CP={CP}
+          mate={mate}
+          pieceColor={pieceColor}
+        />
 
         {/* middle */}
         <div className="space-y-2">

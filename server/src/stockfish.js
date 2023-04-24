@@ -35,7 +35,7 @@ export function finishAnalysis(message) {
 // get best move from stockfish message
 export function onMessageListener(message) {
   if (finishAnalysis(message)) {
-    console.log(message, '\n');
+    // console.log(message, '\n');
 
     finished = true;
     const re = /cp [-\d]+|mate [-\d]+|(?<!\w)pv [\w\d]+/g;

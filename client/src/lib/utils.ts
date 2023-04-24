@@ -14,6 +14,22 @@ export function CPClassName(bot: string, CP: number) {
   return '';
 }
 
+export function gameOverClassName(
+  bot: string,
+  draw?: boolean,
+  winner?: string
+) {
+  if (draw) return 'top-[48%] text-black';
+
+  if (winner) {
+    if (bot === 'white' && winner === 'white') return 'bottom-0 text-black';
+    if (bot === 'white' && winner === 'black') return 'top-0 text-white';
+    if (bot === 'black' && winner === 'black') return 'bottom-0 text-white';
+    if (bot === 'black' && winner === 'white') return 'top-0 text-black';
+  }
+  return '';
+}
+
 export function evalBarClassName(
   percent: number,
   bot: string,

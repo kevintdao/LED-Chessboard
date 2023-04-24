@@ -15,7 +15,12 @@ export default function Left({ gameOver, turn, CP, mate, pieceColor }: Props) {
     <div className="w-16 sm:block hidden">
       <div className="h-full bg-dark-300 rounded-md overflow-y-auto flex flex-col items-center text-center gap-2 py-2 pb-4">
         <Turn gameOver={gameOver} turn={turn} />
-        <EvalBar CP={CP} mate={mate} boardOrientation={pieceColor} />
+        <EvalBar
+          CP={CP}
+          gameOver={gameOver}
+          mate={mate}
+          boardOrientation={pieceColor}
+        />
 
         {/* stockfish depth */}
         <div className="text-xs block">

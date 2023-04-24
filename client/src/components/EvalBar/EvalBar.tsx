@@ -3,6 +3,7 @@ import EvalScore from './EvalScore';
 
 interface Props {
   CP: number;
+  gameOver?: GameOver;
   mate?: number;
   boardOrientation: string;
 }
@@ -12,7 +13,14 @@ export function normalizeCP(cp: number): number {
   return (1 / dem) * 100;
 }
 
-export default function EvalBar({ CP, mate, boardOrientation }: Props) {
+export default function EvalBar({
+  CP,
+  gameOver,
+  mate,
+  boardOrientation,
+}: Props) {
+  const winner = gameOver?.winner;
+  const draw = gameOver?.draw;
   const player = boardOrientation;
   const percent = normalizeCP(CP);
 
@@ -24,7 +32,13 @@ export default function EvalBar({ CP, mate, boardOrientation }: Props) {
       )}
     >
       <div className="relative h-full">
-        <EvalScore CP={CP} mate={mate} bot={player} />
+        <EvalScore
+          CP={CP}
+          winner={winner}
+          draw={draw}
+          mate={mate}
+          bot={player}
+        />
 
         <div
           className={classNames(

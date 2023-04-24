@@ -11,7 +11,7 @@ export const initializeSocket = (io) => {
     const { roomId, id, user, piece, type, depth } = socket.handshake.query;
 
     // check if room exists
-    const room = rooms.find((room) => room.id === roomId);
+    let room = rooms.find((room) => room.id === roomId);
 
     // join or create room
     joinOrCreateRoom(io, socket, room, roomId, user, type, piece, depth);
@@ -26,6 +26,9 @@ export const initializeSocket = (io) => {
     }
 
     console.log('a user connected');
+
+    room = rooms.find((room) => room.id === roomId);
+    computeCP(io, room, roomId);
 
     // disconnect socket event
     socket.on('disconnect', () => {

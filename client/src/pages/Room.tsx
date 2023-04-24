@@ -20,6 +20,7 @@ import { io } from 'socket.io-client';
 import { v4 } from 'uuid';
 import Right from '../components/Room/Right';
 import Left from '../components/Room/Left';
+import GameOverDialog from '../components/Dialogs/GameOverDialog';
 
 const captureAudio = new Audio(CaptureSound);
 const moveAudio = new Audio(MoveSound);
@@ -65,6 +66,9 @@ export default function Room() {
   // hint arrow
   const [hintArrow, setHintArrow] = useState<Square[][]>([]);
 
+  // dialog state
+  const [isGameOverOpen, setIsGameOverOpen] = useState<boolean>(false);
+
   function makeMove(sourceSquare: Square, targetSquare: Square) {
     const gameCopy = new Chess();
     gameCopy.loadPgn(game.pgn());
@@ -72,6 +76,7 @@ export default function Room() {
     const result = gameCopy.move({
       from: sourceSquare,
       to: targetSquare,
+      promotion: 'q',
     });
 
     setGame(gameCopy);
@@ -90,7 +95,7 @@ export default function Room() {
     if (result.piece === 'k') {
       result.color === 'w'
         ? setKingPosition({ ...kingPosition, w: result.to })
-        : setKingPosition({ ...kingPosition, w: result.to });
+        : setKingPosition({ ...kingPosition, b: result.to });
     }
 
     // add captured piece
@@ -179,7 +184,7 @@ export default function Room() {
     // check if game is over
     if (game.isGameOver()) {
       setGameOver(gameOverType(game, undefined));
-      // setIsGameOverOpen(true);
+      setIsGameOverOpen(true);
     }
 
     // check if king of the current player is in check
@@ -293,6 +298,14 @@ export default function Room() {
         {/* right side components */}
         <Right game={game} handleHint={handleHint} />
       </div>
+
+      {/* game over dialog */}
+      <GameOverDialog
+        user={pieceColor}
+        gameOver={gameOver}
+        isOpen={isGameOverOpen}
+        setIsOpen={setIsGameOverOpen}
+      />
     </div>
   );
 }

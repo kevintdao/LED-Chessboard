@@ -6,9 +6,10 @@ import time
 from firebase import db
 
 board = chess.Board()
-board.set_fen(
-    "r1bqkbnr/ppp2ppp/2np4/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 2 4")
+# board.set_fen(
+#     "r1bqkbnr/ppp2ppp/2np4/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 2 4")
 picked_up = []
+prev_move = []
 move_set = [['e2', 'e4']]
 
 
@@ -27,15 +28,17 @@ LED_MAPPING = {
 def move_listener(message):
   data = message['data']
 
+  print(data)
+
   if data is None or 'from' not in data or 'to' not in data:
     return
 
   # get the move
-  moveFrom = data['from']
-  moveTo = data['to']
+  from_square = data['from']
+  to_square = data['to']
 
   # convert move into chess
-  move = chess.Move.from_uci(moveFrom + moveTo)
+  move = chess.Move.from_uci(from_square + to_square)
   try:
     board.push(move)  # Make the move
   except:
@@ -43,6 +46,15 @@ def move_listener(message):
 
   print('Move:', move)
   print(board)
+
+  prev_move = [from_square, to_square]
+  led = "PM "
+  led += " ".join([str(LED_MAPPING[move])
+                  for move in prev_move]) + "\n"
+
+  # display move
+  res = led.encode('utf-8')
+  ser.write(res)
 
 
 def turn_listener(message):
@@ -114,30 +126,12 @@ if __name__ == '__main__':
   ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
   ser.reset_input_buffer()
 
-  # add_move('e2', 'e4')
-  # time.sleep(10)
-  # add_move('f1', 'c4')
-  # time.sleep(10)
-  # add_move('d1', 'h5')
-  # time.sleep(10)
-  # add_move('h5', 'f7')
-  # time.sleep(10)
+  move_stream = db.child("moves").stream(move_listener)
 
   # fen_stream = db.child('fen').stream(fen_listener)
 
   while True:
     moves = get_all_legal_moves(board)
-    # led = " ".join([LED_MAPPING[move] for move in moves['e2']]) + "\n"
-    # res = led.encode('utf-8')
-    # print(res)
-    # ser.write(res)
-    # time.sleep(2)
-
-    # led = " ".join([LED_MAPPING[move] for move in moves['g1']]) + "\n"
-    # res = led.encode('utf-8')
-    # print(res)
-    # ser.write(res)
-    # time.sleep(2)
 
     if ser.in_waiting > 0:
       line = ser.readline().decode('utf-8').rstrip()
@@ -157,18 +151,23 @@ if __name__ == '__main__':
 
         # check if pin picked up in in legal moves (piece is being taken)
         if len(picked_up) == 2:
-          pass
           # remove the pin from picked up
-          # if picked_up in moves[square]:
-          #   picked_up.remove(pin)
-          #   break
+          from_square = [k for k, v in LED_MAPPING.items() if v ==
+                         picked_up[0]][0]
+          if pin in moves[from_square]:
+            picked_up.remove(pin)
+            continue
 
           # a piece is picked up (display legal moves led)
         if len(picked_up) == 1:
+          # check if square in moves
+          if square not in moves:
+            continue
+
           # led to light up
           led = "LM "
           led += " ".join([str(LED_MAPPING[move])
-                           for move in moves[square]]) + "\n"
+                          for move in moves[square]]) + "\n"
 
           # send led of legal moves to arduino
           res = led.encode('utf-8')
@@ -204,7 +203,6 @@ if __name__ == '__main__':
           if to_square not in moves[from_square]:
             print('Illegal move')
             print(picked_up)
-            continue
 
           # call add move function
           print(
@@ -217,5 +215,4 @@ if __name__ == '__main__':
         res = "\n".encode('utf-8')
         ser.write(res)
 
-  move_stream = db.child("moves").stream(move_listener)
-  turn_stream = db.child('turn').stream(turn_listener)
+  # turn_stream = db.child('turn').stream(turn_listener)

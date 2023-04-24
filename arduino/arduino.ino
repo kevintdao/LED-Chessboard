@@ -46,6 +46,7 @@ BYTES_VAL_T oldPinValues2;
 
 String command;
 String strs[20];
+int prevMoves[2];
 int StringCount = 0;
 
 // Declare our NeoPixel strip object:
@@ -192,8 +193,14 @@ void displayLeds()
       strip.setPixelColor(strs[i].toInt(), strip.Color(0, 255, 0));
     }
     else if (c == "PM") {
+      prevMoves[i] = strs[i].toInt();
       strip.setPixelColor(strs[i].toInt(), strip.Color(255, 255, 0));
     }
+  }
+
+  // always display previous moves leds
+  for (int i = 0; i < 2; i++){
+    strip.setPixelColor(prevMoves[i], strip.Color(255, 255, 0));
   }
   strip.show();
 }

@@ -51,6 +51,7 @@ export default function Room() {
   const [pieceColor, setPieceColor] = useState<BoardOrientation>('white');
   const [turn, setTurn] = useState(game.turn());
   const [gameOver, setGameOver] = useState<GameOver | undefined>();
+  const [resign, setResign] = useState<string | undefined>(undefined);
   const [captures, setCaptures] = useState({
     w: initialCaptures,
     b: initialCaptures,
@@ -126,6 +127,9 @@ export default function Room() {
 
   // handle drop event
   function onDrop(sourceSquare: Square, targetSquare: Square): boolean {
+    // check if gameover
+    if (gameOver) return false;
+
     const result = makeMove(sourceSquare, targetSquare);
 
     // send move to server using socket
@@ -155,6 +159,10 @@ export default function Room() {
     });
   }
 
+  function handleResign() {
+    setResign(game.turn());
+  }
+
   const handleUpdateBoard = (data: SocketMove) => {
     try {
       makeMove(data.from, data.to);
@@ -182,8 +190,8 @@ export default function Room() {
 
   useEffect(() => {
     // check if game is over
-    if (game.isGameOver()) {
-      setGameOver(gameOverType(game, undefined));
+    if (game.isGameOver() || resign) {
+      setGameOver(gameOverType(game, resign));
       setIsGameOverOpen(true);
       setOptionSquares({});
     }
@@ -198,7 +206,7 @@ export default function Room() {
     } else {
       setCheckedSquare({});
     }
-  }, [turn]);
+  }, [turn, resign]);
 
   useEffect(() => {
     // connect to room
@@ -297,14 +305,18 @@ export default function Room() {
         </div>
 
         {/* right side components */}
-        <Right game={game} handleHint={handleHint} gameOver={gameOver} />
+        <Right
+          game={game}
+          handleHint={handleHint}
+          handleResign={handleResign}
+          gameOver={gameOver}
+        />
       </div>
 
       <div className="sm:mx-0 mx-2">
-        <div className="bg-dark-300 p-2 rounded-md flex justify-center">
-          <span>
-            <span className="font-semibold">FEN:</span> {game.fen()}
-          </span>
+        <div className="bg-dark-300 p-2 rounded-md max-w-[816px] mx-auto flex gap-1 sm:justify-center justify-start">
+          <div className="font-bold">FEN:</div>
+          <div>{game.fen()}</div>
         </div>
       </div>
 

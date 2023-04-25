@@ -33,8 +33,16 @@ export function gameOverClassName(
 export function evalBarClassName(
   percent: number,
   bot: string,
-  mate?: number
+  mate?: number,
+  winner?: string
 ): number {
+  if (winner) {
+    if (bot === 'white' && winner === 'white') return 0;
+    if (bot === 'white' && winner === 'black') return 100;
+    if (bot === 'black' && winner === 'black') return 0;
+    if (bot === 'black' && winner === 'white') return 100;
+  }
+
   if (mate) {
     if (bot === 'white' && mate < 0) return 0;
     if (bot === 'white' && mate > 0) return 100;

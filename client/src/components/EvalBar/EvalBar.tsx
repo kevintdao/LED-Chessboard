@@ -46,7 +46,7 @@ export default function EvalBar({
             player === 'white' ? 'bg-[#779952]' : 'bg-[#edeed1]'
           )}
           style={{
-            height: `${evalBarClassName(percent, player, mate)}%`,
+            height: `${evalBarClassName(percent, player, mate, winner)}%`,
             transition: '1s ease',
           }}
         ></div>

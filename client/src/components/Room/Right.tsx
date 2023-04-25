@@ -7,10 +7,16 @@ import History from '../History';
 interface Props {
   game: Chess;
   handleHint: () => void;
+  handleResign: () => void;
   gameOver?: GameOver;
 }
 
-export default function Right({ game, handleHint, gameOver }: Props) {
+export default function Right({
+  game,
+  handleHint,
+  handleResign,
+  gameOver,
+}: Props) {
   return (
     <div className="w-64 md:flex flex-col hidden gap-2">
       <History
@@ -23,7 +29,7 @@ export default function Right({ game, handleHint, gameOver }: Props) {
           <IconBulbFilled className="h-4 w-4" />
           <span>Show Hint</span>
         </Button>
-        <Button disabled={!!gameOver}>
+        <Button onClick={() => handleResign()} disabled={!!gameOver}>
           <FlagIcon className="h-4 w-4" />
           <span>Resign</span>
         </Button>

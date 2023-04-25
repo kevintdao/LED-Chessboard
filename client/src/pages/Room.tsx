@@ -1,7 +1,12 @@
 import { Chess } from 'chess.js';
 import { useEffect, useState } from 'react';
 import { Chessboard } from 'react-chessboard';
-import { useLocation, useParams, useSearchParams } from 'react-router-dom';
+import {
+  Navigate,
+  useLocation,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 
 import CaptureSound from '../assets/audios/capture.mp3';
 import MoveSound from '../assets/audios/move-self.mp3';
@@ -21,8 +26,9 @@ import { v4 } from 'uuid';
 import Right from '../components/Room/Right';
 import Left from '../components/Room/Left';
 import GameOverDialog from '../components/Dialogs/GameOverDialog';
-import Button from '../components/Button';
 import { ClipboardDocumentIcon } from '@heroicons/react/24/solid';
+import { getAuth } from 'firebase/auth';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 const captureAudio = new Audio(CaptureSound);
 const moveAudio = new Audio(MoveSound);
@@ -40,6 +46,9 @@ export default function Room() {
   const { state } = useLocation();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+
+  const auth = getAuth();
+  const [user, loading] = useAuthState(auth);
 
   const depth = searchParams.get('depth');
   const { socket, setSocket } = useGame();
@@ -253,6 +262,8 @@ export default function Room() {
   const oppPieceColor = pieceColor === 'white' ? 'black' : 'white';
   const name = pieceColor === 'white' ? 'White' : 'Black';
   const oppName = pieceColor === 'white' ? 'Black' : 'White';
+
+  if (!user) return <Navigate to="/" />;
 
   return (
     <div className="text-white container mx-auto py-1 space-y-2">

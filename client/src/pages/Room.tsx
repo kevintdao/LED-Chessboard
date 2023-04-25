@@ -21,6 +21,8 @@ import { v4 } from 'uuid';
 import Right from '../components/Room/Right';
 import Left from '../components/Room/Left';
 import GameOverDialog from '../components/Dialogs/GameOverDialog';
+import Button from '../components/Button';
+import { ClipboardDocumentIcon } from '@heroicons/react/24/solid';
 
 const captureAudio = new Audio(CaptureSound);
 const moveAudio = new Audio(MoveSound);
@@ -316,7 +318,15 @@ export default function Room() {
       <div className="sm:mx-0 mx-2">
         <div className="bg-dark-300 p-2 rounded-md max-w-[816px] mx-auto flex gap-1 sm:justify-center justify-start">
           <div className="font-bold">FEN:</div>
-          <div>{game.fen()}</div>
+          <div>
+            {game.fen()}
+            <button
+              onClick={() => navigator.clipboard.writeText(game.fen())}
+              className="inline-flex gap-1 items-center ml-1"
+            >
+              <ClipboardDocumentIcon className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 

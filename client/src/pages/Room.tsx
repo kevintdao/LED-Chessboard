@@ -286,6 +286,7 @@ export default function Room() {
             name={depth ? `${oppName} (Depth: ${depth})` : oppName}
             captures={captures[oppPieceColor === 'white' ? 'w' : 'b']}
             oppCaptures={captures[pieceColor === 'white' ? 'w' : 'b']}
+            turn={turn}
           />
 
           <Chessboard
@@ -315,6 +316,7 @@ export default function Room() {
             name={name}
             captures={captures[pieceColor === 'white' ? 'w' : 'b']}
             oppCaptures={captures[oppPieceColor === 'white' ? 'w' : 'b']}
+            turn={turn}
           />
         </div>
 

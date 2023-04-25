@@ -1,15 +1,24 @@
+import { IconClockHour3 } from '@tabler/icons-react';
 import BlackUser from './../assets/images/black-user.png';
 import WhiteUser from './../assets/images/white-user.png';
 import Captured from './Captured';
+import Clock from './Clock';
 
 interface Props {
   name?: string;
   color: string;
+  turn: string;
   captures: Captures;
   oppCaptures: Captures;
 }
 
-export default function User({ name, color, captures, oppCaptures }: Props) {
+export default function User({
+  name,
+  color,
+  turn,
+  captures,
+  oppCaptures,
+}: Props) {
   return (
     <div className="bg-dark-300 p-2 rounded-md flex justify-between">
       {/* left */}
@@ -33,19 +42,7 @@ export default function User({ name, color, captures, oppCaptures }: Props) {
       </div>
 
       {/* right */}
-      <div className="flex gap-2 items-center">
-        {/* login/logout button */}
-        {/* <button
-          className={classNames(
-            'p-1 rounded-lg font-semibold cursor-pointer',
-            color === 'white'
-              ? 'bg-white-piece text-black-piece'
-              : 'bg-black-piece text-white-piece'
-          )}
-        >
-          Login
-        </button> */}
-      </div>
+      <Clock turn={turn} color={color === 'white' ? 'w' : 'b'} />
     </div>
   );
 }

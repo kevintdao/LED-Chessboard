@@ -12,7 +12,7 @@
   "dependencies": {
     "@headlessui/react": "^1.7.11",
     "@heroicons/react": "^2.0.16",
-    "@tabler/icons-react": "^2.4.0",
+    "@tabler/icons-react": "^2.17.0",
     "@types/lodash": "^4.14.191",
     "@types/uuid": "^9.0.1",
     "chess.js": "^1.0.0-beta.3",

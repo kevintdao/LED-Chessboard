@@ -1,4 +1,3 @@
-import { IconClockHour3 } from '@tabler/icons-react';
 import BlackUser from './../assets/images/black-user.png';
 import WhiteUser from './../assets/images/white-user.png';
 import Captured from './Captured';
@@ -10,6 +9,7 @@ interface Props {
   turn: string;
   captures: Captures;
   oppCaptures: Captures;
+  gameOver?: GameOver;
 }
 
 export default function User({
@@ -18,6 +18,7 @@ export default function User({
   turn,
   captures,
   oppCaptures,
+  gameOver,
 }: Props) {
   return (
     <div className="bg-dark-300 p-2 rounded-md flex justify-between">
@@ -42,7 +43,11 @@ export default function User({
       </div>
 
       {/* right */}
-      <Clock turn={turn} color={color === 'white' ? 'w' : 'b'} />
+      <Clock
+        turn={turn}
+        color={color === 'white' ? 'w' : 'b'}
+        gameOver={gameOver}
+      />
     </div>
   );
 }

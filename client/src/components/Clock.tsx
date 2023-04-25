@@ -16,9 +16,11 @@ const icons = [
 export default function Clock({
   turn,
   color,
+  gameOver,
 }: {
   turn: string;
   color: string;
+  gameOver?: GameOver;
 }) {
   const [count, setCount] = useState(0);
 
@@ -33,7 +35,7 @@ export default function Clock({
   return (
     <div className="flex gap-2 items-center">
       <div className="bg-dark-400 h-full flex items-center p-2 rounded-lg">
-        {turn !== color ? (
+        {turn !== color || gameOver ? (
           <IconClockHour3 className="h-6 w-6 text-gray-400" />
         ) : (
           icons[count]

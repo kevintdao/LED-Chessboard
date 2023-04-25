@@ -287,6 +287,7 @@ export default function Room() {
             captures={captures[oppPieceColor === 'white' ? 'w' : 'b']}
             oppCaptures={captures[pieceColor === 'white' ? 'w' : 'b']}
             turn={turn}
+            gameOver={gameOver}
           />
 
           <Chessboard
@@ -317,6 +318,7 @@ export default function Room() {
             captures={captures[pieceColor === 'white' ? 'w' : 'b']}
             oppCaptures={captures[oppPieceColor === 'white' ? 'w' : 'b']}
             turn={turn}
+            gameOver={gameOver}
           />
         </div>
 

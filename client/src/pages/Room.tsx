@@ -29,6 +29,7 @@ import GameOverDialog from '../components/Dialogs/GameOverDialog';
 import { ClipboardDocumentIcon } from '@heroicons/react/24/solid';
 import { getAuth } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import Fen from '../components/Room/Fen';
 
 const captureAudio = new Audio(CaptureSound);
 const moveAudio = new Audio(MoveSound);
@@ -326,20 +327,7 @@ export default function Room() {
         />
       </div>
 
-      <div className="sm:mx-0 mx-2">
-        <div className="bg-dark-300 p-2 rounded-md max-w-[816px] mx-auto flex gap-1 sm:justify-center justify-start">
-          <div className="font-bold">FEN:</div>
-          <div>
-            {game.fen()}
-            <button
-              onClick={() => navigator.clipboard.writeText(game.fen())}
-              className="inline-flex gap-1 items-center ml-1"
-            >
-              <ClipboardDocumentIcon className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <Fen fen={game.fen()} />
 
       {/* game over dialog */}
       <GameOverDialog

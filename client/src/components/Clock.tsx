@@ -1,3 +1,4 @@
+import { ArrowUpIcon } from '@heroicons/react/24/solid';
 import {
   IconClockHour12,
   IconClockHour3,
@@ -34,11 +35,14 @@ export default function Clock({
 
   return (
     <div className="flex gap-2 items-center">
-      <div className="bg-dark-400 h-full flex items-center p-2 rounded-lg">
+      <div className="bg-dark-400 h-full flex items-center p-2 rounded-lg flex-col">
         {turn !== color || gameOver ? (
           <IconClockHour3 className="h-6 w-6 text-gray-400" />
         ) : (
-          icons[count]
+          <>
+            {icons[count]}
+            <ArrowUpIcon className="h-2 w-2" />
+          </>
         )}
       </div>
     </div>

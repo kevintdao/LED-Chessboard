@@ -26,7 +26,6 @@ import { v4 } from 'uuid';
 import Right from '../components/Room/Right';
 import Left from '../components/Room/Left';
 import GameOverDialog from '../components/Dialogs/GameOverDialog';
-import { ClipboardDocumentIcon } from '@heroicons/react/24/solid';
 import { getAuth } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import Fen from '../components/Room/Fen';
@@ -49,7 +48,7 @@ export default function Room() {
   const [searchParams] = useSearchParams();
 
   const auth = getAuth();
-  const [user, loading] = useAuthState(auth);
+  const [user] = useAuthState(auth);
 
   const depth = searchParams.get('depth');
   const { socket, setSocket } = useGame();

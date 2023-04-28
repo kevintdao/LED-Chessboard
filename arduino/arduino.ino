@@ -46,7 +46,7 @@ BYTES_VAL_T oldPinValues2;
 
 String command;
 String strs[20];
-int prevMoves[2];
+int prevMoves[2] = {64, 64};
 int StringCount = 0;
 
 // Declare our NeoPixel strip object:
@@ -130,7 +130,8 @@ void display_pin_values()
     bool currPinValue = bitRead(pinValues1, i);
     bool oldPinValue = bitRead(oldPinValues1, i);
 
-    if (currPinValue != oldPinValue) {
+    if (currPinValue != oldPinValue)
+    {
       // picked up
       if (currPinValue)
       {
@@ -146,7 +147,7 @@ void display_pin_values()
         // strip.setPixelColor(i, strip.Color(255, 0, 0));
       }
       // Serial.print("\r\n");
-      }
+    }
   }
 
   // second 32 pins
@@ -158,7 +159,8 @@ void display_pin_values()
     bool currPinValue = bitRead(pinValues2, i);
     bool oldPinValue = bitRead(oldPinValues2, i);
 
-    if (currPinValue != oldPinValue) {
+    if (currPinValue != oldPinValue)
+    {
       // picked up
       if (currPinValue)
       {
@@ -189,19 +191,27 @@ void displayLeds()
   String c = strs[0];
   for (int i = 1; i < StringCount; i++)
   {
-    if (c == "LM") {
+    if (c == "LM")
+    {
       strip.setPixelColor(strs[i].toInt(), strip.Color(0, 255, 0));
     }
-    else if (c == "PM") {
-      prevMoves[i] = strs[i].toInt();
+    else if (c == "PM")
+    {
+      prevMoves[i - 1] = strs[i].toInt();
       strip.setPixelColor(strs[i].toInt(), strip.Color(255, 255, 0));
     }
   }
+  strip.show();
+}
 
+void displayPreviousMove(int prevMoves[])
+{
   // always display previous moves leds
-  for (int i = 0; i < 2; i++){
+  for (int i = 0; i < 2; i++)
+  {
     strip.setPixelColor(prevMoves[i], strip.Color(255, 255, 0));
   }
+
   strip.show();
 }
 
@@ -250,7 +260,7 @@ void setup()
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
-  strip.setBrightness(25); // Set BRIGHTNESS to about 1/5 (max = 255)
+  strip.setBrightness(75); // Set BRIGHTNESS to about 1/5 (max = 255)
 }
 
 void loop()
@@ -271,10 +281,6 @@ void loop()
   }
 
   delay(POLL_DELAY_MSEC);
-
-  // testing serial communication
-  // Serial.println("up 1");
-  // delay(1000);
 
   if (Serial.available())
   {
@@ -299,43 +305,7 @@ void loop()
     }
   }
 
-  delay(100);
-  displayLeds();
-
-  // Serial.println("down 1");
-  // delay(1000);
-
-  // if (Serial.available())
-  // {
-  //   command = Serial.readStringUntil("\n");
-  //   command.trim();
-
-  //   // Split the string into substrings
-  //   StringCount = 0;
-  //   while (command.length() > 0)
-  //   {
-  //     int index = command.indexOf(' ');
-  //     if (index == -1) // No space found
-  //     {
-  //       strs[StringCount++] = command;
-  //       break;
-  //     }
-  //     else
-  //     {
-  //       strs[StringCount++] = command.substring(0, index);
-  //       command = command.substring(index + 1);
-  //     }
-  //   }
-  // }
-
   // delay(100);
-  // displayLegalMoves();
-
-  // testing get_pin_change
-  // long long currPinValues = 0b1000000000000000000010000000000010000000000000000000100000000000;
-  // long long oldPinValues  = 0b110000000000000000001000000000011000000000000000000100000000000;
-
-  // get_pin_change(currPinValues, oldPinValues);
-
-  // delay(2000);
+  displayLeds();
+  // displayPreviousMove(prevMoves);
 }

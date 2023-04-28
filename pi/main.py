@@ -2,7 +2,6 @@
 import serial
 import chess
 import re
-import time
 from firebase import db
 
 board = chess.Board()
@@ -10,7 +9,6 @@ board = chess.Board()
 #     "r1bqkbnr/ppp2ppp/2np4/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 2 4")
 picked_up = []
 prev_move = []
-move_set = [['e2', 'e4']]
 
 
 LED_MAPPING = {
@@ -132,6 +130,7 @@ if __name__ == '__main__':
 
   while True:
     moves = get_all_legal_moves(board)
+    print("Previous Move: ", prev_move)
 
     if ser.in_waiting > 0:
       line = ser.readline().decode('utf-8').rstrip()
@@ -164,6 +163,12 @@ if __name__ == '__main__':
           if square not in moves:
             continue
 
+          # check if square is in the previous move
+          if square in prev_move:
+            # clear previous move
+            prev_move = []
+            continue
+
           # led to light up
           led = "LM "
           led += " ".join([str(LED_MAPPING[move])
@@ -187,6 +192,10 @@ if __name__ == '__main__':
 
         # get the square from pin
         square = [k for k, v in LED_MAPPING.items() if v == pin][0]
+
+        # check if square is in the previous move
+        if square in prev_move:
+          continue
 
         # check if pin is in picked up (the same piece is put down)
         if pin in picked_up:
